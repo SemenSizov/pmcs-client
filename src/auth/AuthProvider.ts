@@ -3,6 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 import type { UserPayload } from '../types/User';
 import { logout as performLogout } from './auth';
 import React from 'react';
+import { addAuthTokenToApi, removeAuthTokenFromApi } from '../api/api';
 
 export interface AuthContextType {
   token: string | null;
@@ -32,11 +33,13 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         console.log('Decoded token:', decoded);
         setToken(storedToken);
         setUser(decoded);
+        addAuthTokenToApi(storedToken)
         setIsLoading(false);
       } catch (error) {
         console.error('Token decoding error:', error);
         performLogout();
         setToken(null);
+        removeAuthTokenFromApi()
         setUser(null);
         setIsLoading(false);
       }
@@ -47,10 +50,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = (token: string) => {
-    console.log('Saving token:', token); // 🧪
     localStorage.setItem('token', token);
     const decoded = jwtDecode<UserPayload>(token);
-    console.log('Decoded token in login():', decoded); // 🧪
     setToken(token);
     setUser(decoded);
   };
