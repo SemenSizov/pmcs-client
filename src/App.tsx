@@ -3,7 +3,7 @@ import { AuthProvider } from './auth/AuthProvider';
 import AuthCallback from './auth/AuthCallback';
 import NotFound from './auth/NotFound';
 import Dashboard from './pages/Dashboard';
-import AdminPage from './pages/AdminPage';
+import AdminRoutes from './routes/AdminRoutes';
 import ProtectedRoute from './components/ProtectedRoute';
 import NavigationBar from './components/Navbar';
 import MetersPage from './pages/MetersPage';
@@ -18,10 +18,10 @@ const App = () => (
         <Route path="/user-not-found" element={<NotFound />} />
 
         <Route
-          path="/admin"
+          path="/admin/*"
           element={
             <ProtectedRoute roles={['admin']}>
-              <AdminPage />
+              <AdminRoutes  />
             </ProtectedRoute>
           }
         />
