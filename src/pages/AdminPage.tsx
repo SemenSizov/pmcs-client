@@ -10,6 +10,11 @@ export default function AdminPage() {
             Користувачі
           </Nav.Link>
         </Nav.Item>
+        <Nav.Item>
+          <Nav.Link as={NavLink} to="equipment-types">
+            Типи обладнання
+          </Nav.Link>
+        </Nav.Item>
         {/* Додаси ще вкладки */}
       </Nav>
       <Outlet />
