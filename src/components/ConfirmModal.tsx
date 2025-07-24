@@ -9,7 +9,7 @@ interface ConfirmModalProps {
   onCancel: () => void;
 }
 
-const ConfirmModal: FC<ConfirmModalProps> = ({ show, title = 'Confirm', message, onConfirm, onCancel }) => (
+const ConfirmModal: FC<ConfirmModalProps> = ({ show, title = 'Підтвердження дії', message, onConfirm, onCancel }) => (
   <Modal show={show} onHide={onCancel} centered>
     <Modal.Header closeButton>
       <Modal.Title>{title}</Modal.Title>
@@ -18,8 +18,8 @@ const ConfirmModal: FC<ConfirmModalProps> = ({ show, title = 'Confirm', message,
       <p>{message}</p>
     </Modal.Body>
     <Modal.Footer>
-      <Button variant="secondary" onClick={onCancel}>Cancel</Button>
-      <Button variant="danger" onClick={onConfirm}>Delete</Button>
+      <Button variant="secondary" onClick={onCancel}>Відмінити</Button>
+      <Button variant="danger" onClick={onConfirm}>Підтвердити</Button>
     </Modal.Footer>
   </Modal>
 );
