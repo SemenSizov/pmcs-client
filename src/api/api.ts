@@ -5,4 +5,12 @@ const api = axios.create({
   withCredentials: false // якщо треба — можна ввімкнути
 });
 
+export const addAuthTokenToApi = (token: string) =>{
+  api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+}
+
+export const removeAuthTokenFromApi = () => {
+  delete api.defaults.headers.common['Authorization']
+}
+
 export default api;
