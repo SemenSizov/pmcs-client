@@ -2,7 +2,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import AdminPage from "../pages/AdminPage";
 import AdminUsersPage from "../pages/AdminUsersPage";
 import AdminEquipmentTypesPage from "../pages/AdminEquipmentTypesPage";
-// інші адмін-сторінки пізніше
+import AdminEquipmentUnitsPage from "../pages/AdminEquipmentUnitsPage";
+import AdminLocationsPage from "../pages/AdminLocationsPage";
 
 export default function AdminRoutes() {
   return (
@@ -11,7 +12,8 @@ export default function AdminRoutes() {
         <Route index element={<Navigate to="users" replace />} />
         <Route path="users" element={<AdminUsersPage />} />
         <Route path="equipment-types" element={<AdminEquipmentTypesPage />} />
-        {/* Додаси тут інші сторінки */}
+        <Route path="equipment-units" element={<AdminEquipmentUnitsPage />} />
+        <Route path="locations" element={<AdminLocationsPage />} />
       </Route>
     </Routes>
   );

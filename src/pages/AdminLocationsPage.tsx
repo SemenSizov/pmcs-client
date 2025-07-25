@@ -4,22 +4,33 @@ import { toast } from 'react-toastify';
 import api from '../api/api';
 import ConfirmModal from '../components/ConfirmModal';
 
-interface UnitType {
+interface Location {
   id: number;
   name: string;
 }
 
+interface LocationDTO {
+  id: number;
+  name: string;
+  units: {
+    id: number;
+    unitType: { id: number; name: string };
+    location: { id: number; name: string };
+    serial: string;
+  }[];
+}
+
 export default function AdminEquipmentTypesPage() {
-  const [types, setTypes] = useState<UnitType[]>([]);
+  const [locations, setLocations] = useState<LocationDTO[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [editingType, setEditingType] = useState<UnitType | null>(null);
+  const [editingLocation, setEditingLocation] = useState<LocationDTO | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [typeToDelete, setTypeToDelete] = useState<UnitType | null>(null);
+  const [locationToDelete, setLocatinoToDelete] = useState<LocationDTO | null>(null);
 
   const fetchTypes = () => {
     api
-      .get('/equipment-types')
-      .then((res) => setTypes(res.data))
+      .get('/locations')
+      .then((res) => setLocations(res.data))
       .catch((err) => console.error(err));
   };
 
@@ -27,33 +38,33 @@ export default function AdminEquipmentTypesPage() {
     fetchTypes();
   }, []);
 
-  const handleEdit = (type: UnitType) => {
-    setEditingType(type);
+  const handleEdit = (location: LocationDTO) => {
+    setEditingLocation(location);
     setShowModal(true);
   };
 
   const handleAdd = () => {
-    setEditingType(null);
+    setEditingLocation(null);
     setShowModal(true);
   };
 
-  const requestDelete = (user: UnitType) => {
-    setTypeToDelete(user);
+  const requestDelete = (location: LocationDTO) => {
+    setLocatinoToDelete(location);
     setShowConfirm(true);
   };
 
   const confirmDelete = async () => {
-    if (!typeToDelete) return;
+    if (!locationToDelete) return;
 
     try {
-      await api.delete(`/equipment-types/${typeToDelete.id}`).then(() => fetchTypes());
-      toast.success('Тип обладнання видалений');
+      await api.delete(`/locations/${locationToDelete.id}`).then(() => fetchTypes());
+      toast.success('Техніка видалена');
     } catch (error) {
       console.error('Delete failed', error);
-      toast.error('Помилка видалення типу обладнання');
+      toast.error('Помилка видалення техніки');
     } finally {
       setShowConfirm(false);
-      setTypeToDelete(null);
+      setLocatinoToDelete(null);
     }
   };
 
@@ -61,18 +72,18 @@ export default function AdminEquipmentTypesPage() {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const type: UnitType = {
-      id: editingType ? editingType.id : 0,
+    const location: Location = {
+      id: editingLocation ? editingLocation.id : 0,
       name: formData.get('name') as string,
     };
 
-    if (editingType) {
-      api.put(`/equipment-types/${type.id}`, type).then(() => {
+    if (editingLocation) {
+      api.put(`/locations/${location.id}`, location).then(() => {
         setShowModal(false);
         fetchTypes();
       });
     } else {
-      api.post('/equipment-types', type).then(() => {
+      api.post('/locations', location).then(() => {
         setShowModal(false);
         fetchTypes();
       });
@@ -82,27 +93,41 @@ export default function AdminEquipmentTypesPage() {
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>Типи техніки</h4>
-        <Button onClick={handleAdd}>Додати тип</Button>
+        <h4>Одиниці техніки</h4>
+        <Button onClick={handleAdd}>Додати техніку</Button>
       </div>
       <Table striped bordered hover>
         <thead>
           <tr>
             <th>#</th>
             <th>Назва</th>
+            <th>Обладнання</th>
             <th>Дії</th>
           </tr>
         </thead>
         <tbody>
-          {types.map((t, idx) => (
-            <tr key={t.id}>
+          {locations.map((l, idx) => (
+            <tr key={l.id}>
               <td>{idx + 1}</td>
-              <td>{t.name}</td>
+              <td>{l.name}</td>
               <td>
-                <Button size="sm" variant="secondary" onClick={() => handleEdit(t)}>
+                {!l.units?.length ? (
+                  ''
+                ) : (
+                  <ul>
+                    {l.units.map((u) => (
+                      <li>
+                        {u.unitType.name}, Serial: {u.serial}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </td>
+              <td>
+                <Button size="sm" variant="secondary" onClick={() => handleEdit(l)}>
                   Редагувати
                 </Button>{' '}
-                <Button size="sm" variant="danger" onClick={() => requestDelete(t)}>
+                <Button size="sm" variant="danger" onClick={() => requestDelete(l)}>
                   Видалити
                 </Button>
               </td>
@@ -113,13 +138,13 @@ export default function AdminEquipmentTypesPage() {
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{editingType ? 'Редагувати тип' : 'Додати тип'}</Modal.Title>
+          <Modal.Title>{editingLocation ? 'Редагувати техніку' : 'Додати техніку'}</Modal.Title>
         </Modal.Header>
         <Form onSubmit={handleSave}>
           <Modal.Body>
             <Form.Group className="mb-3">
               <Form.Label>Назва</Form.Label>
-              <Form.Control name="name" defaultValue={editingType?.name || ''} required />
+              <Form.Control name="name" defaultValue={editingLocation?.name || ''} required />
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
@@ -134,11 +159,11 @@ export default function AdminEquipmentTypesPage() {
       </Modal>
       <ConfirmModal
         show={showConfirm}
-        message={`Ви впевнені що хочете видалити "${typeToDelete?.name}"?`}
+        message={`Ви впевнені що хочете видалити "${locationToDelete?.name}"?`}
         onConfirm={confirmDelete}
         onCancel={() => {
           setShowConfirm(false);
-          setTypeToDelete(null);
+          setLocatinoToDelete(null);
         }}
       />
     </div>
