@@ -4,6 +4,7 @@ import AdminUsersPage from "../pages/AdminUsersPage";
 import AdminEquipmentTypesPage from "../pages/AdminEquipmentTypesPage";
 import AdminEquipmentUnitsPage from "../pages/AdminEquipmentUnitsPage";
 import AdminLocationsPage from "../pages/AdminLocationsPage";
+import AdminProceduresPage from "../pages/AdminProceduresPage";
 
 export default function AdminRoutes() {
   return (
@@ -14,6 +15,7 @@ export default function AdminRoutes() {
         <Route path="equipment-types" element={<AdminEquipmentTypesPage />} />
         <Route path="equipment-units" element={<AdminEquipmentUnitsPage />} />
         <Route path="locations" element={<AdminLocationsPage />} />
+        <Route path="procedures" element={<AdminProceduresPage />} />
       </Route>
     </Routes>
   );

@@ -25,7 +25,11 @@ export default function AdminPage() {
             Обладнання
           </Nav.Link>
         </Nav.Item>
-        {/* Додаси ще вкладки */}
+        <Nav.Item>
+          <Nav.Link as={NavLink} to="procedures">
+            Регламентні процедури
+          </Nav.Link>
+        </Nav.Item>
       </Nav>
       <Outlet />
     </div>
