@@ -3,22 +3,7 @@ import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import api from '../api/api';
 import ConfirmModal from '../components/ConfirmModal';
-
-interface Location {
-  id: number;
-  name: string;
-}
-
-interface LocationDTO {
-  id: number;
-  name: string;
-  units: {
-    id: number;
-    unitType: { id: number; name: string };
-    location: { id: number; name: string };
-    serial: string;
-  }[];
-}
+import type { Location, LocationDTO } from '../types/Location';
 
 export default function AdminEquipmentTypesPage() {
   const [locations, setLocations] = useState<LocationDTO[]>([]);
@@ -117,7 +102,7 @@ export default function AdminEquipmentTypesPage() {
                   <ul>
                     {l.units.map((u) => (
                       <li>
-                        {u.unitType.name}, Serial: {u.serial}
+                        {u.equipmentType.name}, Serial: {u.serial}
                       </li>
                     ))}
                   </ul>

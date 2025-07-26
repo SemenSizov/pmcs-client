@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import NavigationBar from './components/Navbar';
 import MetersPage from './pages/MetersPage';
 import PMCS from './pages/PMCS';
+import { ToastContainer } from 'react-toastify';
 
 const App = () => (
   <AuthProvider>
@@ -52,6 +53,7 @@ const App = () => (
         />
       </Routes>
     </BrowserRouter>  
+    <ToastContainer/>
   </AuthProvider>
 );
 

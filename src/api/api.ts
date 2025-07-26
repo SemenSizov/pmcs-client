@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -12,5 +13,17 @@ export const addAuthTokenToApi = (token: string) =>{
 export const removeAuthTokenFromApi = () => {
   delete api.defaults.headers.common['Authorization']
 }
+
+api.interceptors.response.use(
+  response=> response, error=> {
+    if(error.response?.status === 500){
+      const errorMessage = 'Сталася помилка на сервері. Спробуйте пізніше.'
+      if (error.message) {
+        errorMessage.concat(`Деталі: ${error.message}`)
+      }
+      toast.error(errorMessage);
+    }
+  }
+)
 
 export default api;

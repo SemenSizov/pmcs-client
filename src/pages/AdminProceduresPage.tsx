@@ -3,32 +3,8 @@ import { Table, Button, Modal, Form } from 'react-bootstrap';
 import api from '../api/api';
 import ConfirmModal from '../components/ConfirmModal';
 import { toast } from 'react-toastify';
-
-interface Procedure {
-  id: number;
-  name: string;
-  type: 'hours' | 'period';
-  hours?: number;
-  period?: string;
-  unit_type_id: number;
-}
-
-interface ProcedureDTO {
-  id: number;
-  name: string;
-  type: 'hours' | 'period';
-  hours?: number;
-  period?: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'annual';
-  unitType: {
-    id: number;
-    name: string;
-  };
-}
-
-interface UnitType {
-  id: number;
-  name: string;
-}
+import type { EquipmentType } from '../types/EquipmentType';
+import type { Procedure, ProcedureDTO } from '../types/Procedure';
 
 const periodMapping = {
   weekly: "Щотижня",
@@ -39,7 +15,7 @@ const periodMapping = {
 }
 
 export default function AdminProceduresPage() {
-  const [types, setTypes] = useState<UnitType[]>([]);
+  const [types, setTypes] = useState<EquipmentType[]>([]);
   const [procedures, setProcedures] = useState<ProcedureDTO[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingProcedure, setEditingProcedure] = useState<ProcedureDTO | null>(null);
@@ -114,7 +90,7 @@ export default function AdminProceduresPage() {
       type: periodicityType,
       hours: periodicityType==='hours' ? +engineHours : 0,
       period: periodicityType==='period' ? periodValue : "",
-      unit_type_id: +formData.get('equipmentTypeId')!
+      equipment_type_id: +formData.get('equipmentTypeId')!
     };
 
     if (editingProcedure) {
@@ -128,6 +104,7 @@ export default function AdminProceduresPage() {
         fetchProcedures();
       });
     }
+    setPeriodValue('')
     setShowModal(false);
   };
 
@@ -152,7 +129,7 @@ export default function AdminProceduresPage() {
           {procedures.map((p, idx) => (
             <tr key={p.id}>
               <td>{idx + 1}</td>
-              <td>{p.unitType.name}</td>
+              <td>{p.equipmentType.name}</td>
               <td>{p.name}</td>
               <td>{p.type === 'period' ? 'Період' : 'Мотогодини'}</td>
               <td>{p.type === 'period' ? periodMapping[p.period!] : p.hours}</td>
@@ -177,7 +154,7 @@ export default function AdminProceduresPage() {
           <Modal.Body>
             <Form.Group className="mb-3">
               <Form.Label>Тип обладнання</Form.Label>
-              <Form.Select name="equipmentTypeId" required defaultValue={editingProcedure?.unitType?.id || ''}>
+              <Form.Select name="equipmentTypeId" required defaultValue={editingProcedure?.equipmentType?.id || ''}>
                 <option value="" disabled>
                   Оберіть тип
                 </option>
@@ -202,7 +179,7 @@ export default function AdminProceduresPage() {
             {periodicityType === 'period' && (
               <Form.Group controlId="periodValue" className="mt-3">
                 <Form.Label>Період</Form.Label>
-                <Form.Select value={periodValue} onChange={(e) => setPeriodValue(e.target.value)}>
+                <Form.Select value={editingProcedure?.period || periodValue} onChange={(e) => setPeriodValue(e.target.value)}>
                   <option value="">Оберіть період</option>
                   <option value="weekly">Щотижня</option>
                   <option value="monthly">Щомісяця</option>

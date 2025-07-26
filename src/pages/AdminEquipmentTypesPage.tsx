@@ -3,18 +3,14 @@ import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import api from '../api/api';
 import ConfirmModal from '../components/ConfirmModal';
-
-interface UnitType {
-  id: number;
-  name: string;
-}
+import type { EquipmentType } from '../types/EquipmentType';
 
 export default function AdminEquipmentTypesPage() {
-  const [types, setTypes] = useState<UnitType[]>([]);
+  const [types, setTypes] = useState<EquipmentType[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [editingType, setEditingType] = useState<UnitType | null>(null);
+  const [editingType, setEditingType] = useState<EquipmentType | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [typeToDelete, setTypeToDelete] = useState<UnitType | null>(null);
+  const [typeToDelete, setTypeToDelete] = useState<EquipmentType | null>(null);
 
   const fetchTypes = () => {
     api
@@ -27,7 +23,7 @@ export default function AdminEquipmentTypesPage() {
     fetchTypes();
   }, []);
 
-  const handleEdit = (type: UnitType) => {
+  const handleEdit = (type: EquipmentType) => {
     setEditingType(type);
     setShowModal(true);
   };
@@ -37,7 +33,7 @@ export default function AdminEquipmentTypesPage() {
     setShowModal(true);
   };
 
-  const requestDelete = (user: UnitType) => {
+  const requestDelete = (user: EquipmentType) => {
     setTypeToDelete(user);
     setShowConfirm(true);
   };
@@ -61,7 +57,7 @@ export default function AdminEquipmentTypesPage() {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const type: UnitType = {
+    const type: EquipmentType = {
       id: editingType ? editingType.id : 0,
       name: formData.get('name') as string,
     };

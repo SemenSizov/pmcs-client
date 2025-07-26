@@ -1,7 +1,6 @@
-export interface UserPayload {
+export interface User {
+  id: number;
+  name: string;
   email: string;
-  name?: string;
-  role?: 'admin' | 'user';
-  exp?: number; // для перевірки токену на клієнті (JWT expiration)
-  [key: string]: any; // якщо є додаткові поля
+  role: "user" | "admin";
 }

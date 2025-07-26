@@ -3,39 +3,18 @@ import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import api from '../api/api';
 import ConfirmModal from '../components/ConfirmModal';
-
-interface UnitType {
-  id: number;
-  name: string;
-}
-
-interface Location {
-  id: number;
-  name: string;
-}
-
-interface UnitDTO {
-  id: string;
-  serial: string;
-  unitType: UnitType;
-  location: Location;
-}
-
-interface Unit {
-  id: string;
-  serial: string;
-  unitTypeId: string;
-  locationId: string
-}
+import type { EquipmentType } from '../types/EquipmentType';
+import type { EquipmentUnit, EquipmentUnitDTO } from '../types/EquipmentUnit';
+import type { Location } from '../types/Location';
 
 export default function AdminEquipmentUnitsPage() {
-  const [types, setTypes] = useState<UnitType[]>([]);
-  const [units, setUnits] = useState<UnitDTO[]>([]);
+  const [types, setTypes] = useState<EquipmentType[]>([]);
+  const [units, setUnits] = useState<EquipmentUnitDTO[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [editingUnit, setEditingUnit] = useState<UnitDTO | null>(null);
+  const [editingUnit, setEditingUnit] = useState<EquipmentUnitDTO | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [unitToDelete, setUnitToDelete] = useState<UnitDTO | null>(null);
+  const [unitToDelete, setUnitToDelete] = useState<EquipmentUnitDTO | null>(null);
 
   const fetchUnits = () => {
     api
@@ -64,7 +43,7 @@ export default function AdminEquipmentUnitsPage() {
     fetchLocations();
   }, []);
 
-  const handleEdit = (unit: UnitDTO) => {
+  const handleEdit = (unit: EquipmentUnitDTO) => {
     setEditingUnit(unit);
     setShowModal(true);
   };
@@ -74,7 +53,7 @@ export default function AdminEquipmentUnitsPage() {
     setShowModal(true);
   };
 
-  const requestDelete = (unit: UnitDTO) => {
+  const requestDelete = (unit: EquipmentUnitDTO) => {
     setUnitToDelete(unit);
     setShowConfirm(true);
   };
@@ -98,10 +77,10 @@ export default function AdminEquipmentUnitsPage() {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const unit: Unit = {
+    const unit: EquipmentUnit = {
       id: editingUnit ? editingUnit.id : "0",
       serial: formData.get('serial') as string,
-      unitTypeId:formData.get('equipmentTypeId') as string,
+      equipmentTypeId:formData.get('equipmentTypeId') as string,
       locationId:formData.get('locationId') as string
     };
 
@@ -139,7 +118,7 @@ export default function AdminEquipmentUnitsPage() {
             <tr key={u.id}>
               <td>{idx + 1}</td>
               <td>{u.serial}</td>
-              <td>{u.unitType.name}</td>
+              <td>{u.equipmentType.name}</td>
               <td>{u.location.name}</td>
               <td>
                 <Button size="sm" variant="secondary" onClick={() => handleEdit(u)}>
@@ -162,7 +141,7 @@ export default function AdminEquipmentUnitsPage() {
           <Modal.Body>
             <Form.Group className="mb-3">
               <Form.Label>Тип обладнання</Form.Label>
-              <Form.Select name="equipmentTypeId" required defaultValue={editingUnit?.unitType?.id || ''}>
+              <Form.Select name="equipmentTypeId" required defaultValue={editingUnit?.equipmentType?.id || ''}>
                 <option value="" disabled>
                   Оберіть тип
                 </option>
@@ -203,7 +182,7 @@ export default function AdminEquipmentUnitsPage() {
       </Modal>
       <ConfirmModal
         show={showConfirm}
-        message={`Ви впевнені що хочете видалити "${unitToDelete?.unitType.name}" з серійним номером "${unitToDelete?.serial}"?`}
+        message={`Ви впевнені що хочете видалити "${unitToDelete?.equipmentType.name}" з серійним номером "${unitToDelete?.serial}"?`}
         onConfirm={confirmDelete}
         onCancel={() => {
           setShowConfirm(false);

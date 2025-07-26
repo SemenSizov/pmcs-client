@@ -3,13 +3,7 @@ import { Table, Button, Modal, Form } from 'react-bootstrap';
 import api from '../api/api';
 import ConfirmModal from '../components/ConfirmModal';
 import { toast } from 'react-toastify';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-}
+import type { User } from '../types/User';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
