@@ -3,24 +3,35 @@ import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import api from '../api/api';
 import ConfirmModal from '../components/ConfirmModal';
+import OverlaySpinner from '../components/OverlaySpinner';
 import type { Location, LocationDTO } from '../types/Location';
+import { Pencil, Trash } from 'react-bootstrap-icons';
 
-export default function AdminEquipmentTypesPage() {
+export default function AdminLocationsPage() {
   const [locations, setLocations] = useState<LocationDTO[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingLocation, setEditingLocation] = useState<LocationDTO | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [locationToDelete, setLocatinoToDelete] = useState<LocationDTO | null>(null);
+  const [locationToDelete, setLocationToDelete] = useState<LocationDTO | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const fetchTypes = () => {
+  const fetchLocations = () => {
+    setIsLoading(true);
     api
       .get('/locations')
-      .then((res) => setLocations(res.data))
-      .catch((err) => console.error(err));
+      .then((res) => {
+        const sorted = [...res.data].sort((a, b) => a.name.localeCompare(b.name));
+        setLocations(sorted);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error('Не вдалося завантажити список техніки');
+      })
+      .finally(() => setIsLoading(false));
   };
 
   useEffect(() => {
-    fetchTypes();
+    fetchLocations();
   }, []);
 
   const handleEdit = (location: LocationDTO) => {
@@ -34,7 +45,7 @@ export default function AdminEquipmentTypesPage() {
   };
 
   const requestDelete = (location: LocationDTO) => {
-    setLocatinoToDelete(location);
+    setLocationToDelete(location);
     setShowConfirm(true);
   };
 
@@ -42,14 +53,15 @@ export default function AdminEquipmentTypesPage() {
     if (!locationToDelete) return;
 
     try {
-      await api.delete(`/locations/${locationToDelete.id}`).then(() => fetchTypes());
+      await api.delete(`/locations/${locationToDelete.id}`);
       toast.success('Техніка видалена');
+      fetchLocations();
     } catch (error) {
       console.error('Delete failed', error);
       toast.error('Помилка видалення техніки');
     } finally {
       setShowConfirm(false);
-      setLocatinoToDelete(null);
+      setLocationToDelete(null);
     }
   };
 
@@ -62,66 +74,72 @@ export default function AdminEquipmentTypesPage() {
       name: formData.get('name') as string,
     };
 
-    if (editingLocation) {
-      api.put(`/locations/${location.id}`, location).then(() => {
-        setShowModal(false);
-        fetchTypes();
-      });
-    } else {
-      api.post('/locations', location).then(() => {
-        setShowModal(false);
-        fetchTypes();
-      });
-    }
+    const action = editingLocation
+      ? api.put(`/locations/${location.id}`, location)
+      : api.post('/locations', location);
+
+    action.then(() => {
+      setShowModal(false);
+      fetchLocations();
+    });
   };
 
   return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>Одиниці техніки</h4>
-        <Button onClick={handleAdd}>Додати техніку</Button>
+    <div className="position-relative">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
+        <h4 className="m-0">Одиниці техніки</h4>
+        <Button onClick={handleAdd} className="w-100 w-md-auto" style={{ maxWidth: '220px' }}>
+          Додати техніку
+        </Button>
       </div>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Назва</th>
-            <th>Обладнання</th>
-            <th>Дії</th>
-          </tr>
-        </thead>
-        <tbody>
-          {locations.map((l, idx) => (
-            <tr key={l.id}>
-              <td>{idx + 1}</td>
-              <td>{l.name}</td>
-              <td>
-                {!l.units?.length ? (
-                  ''
-                ) : (
-                  <ul>
-                    {l.units.map((u) => (
-                      <li>
-                        {u.equipmentType.name}, Serial: {u.serial}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </td>
-              <td>
-                <Button size="sm" variant="secondary" onClick={() => handleEdit(l)}>
-                  Редагувати
-                </Button>{' '}
-                <Button size="sm" variant="danger" onClick={() => requestDelete(l)}>
-                  Видалити
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <div className="table-responsive">
+        <Table striped bordered hover className="mb-4">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Назва</th>
+              <th>Обладнання</th>
+              <th>Дії</th>
+            </tr>
+          </thead>
+          <tbody>
+            {locations.map((l, idx) => (
+              <tr key={l.id}>
+                <td>{idx + 1}</td>
+                <td>{l.name}</td>
+                <td>
+                  {l.units?.length ? (
+                    <ul className="mb-0">
+                      {l.units.map((u) => (
+                        <li key={u.id}>
+                          {u.equipmentType.name}, серійний: {u.serial}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="text-muted">немає</span>
+                  )}
+                </td>
+                <td>
+                  <div className="d-flex gap-2">
+                    <Button size="sm" variant="secondary" onClick={() => handleEdit(l)}>
+                      <Pencil />
+                    </Button>
+                    <Button size="sm" variant="danger" onClick={() => requestDelete(l)}>
+                      <Trash />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+
+      <OverlaySpinner show={isLoading} />
+
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered size="sm">
         <Modal.Header closeButton>
           <Modal.Title>{editingLocation ? 'Редагувати техніку' : 'Додати техніку'}</Modal.Title>
         </Modal.Header>
@@ -129,26 +147,37 @@ export default function AdminEquipmentTypesPage() {
           <Modal.Body>
             <Form.Group className="mb-3">
               <Form.Label>Назва</Form.Label>
-              <Form.Control name="name" defaultValue={editingLocation?.name || ''} required />
+              <Form.Control
+                name="name"
+                defaultValue={editingLocation?.name || ''}
+                required
+                autoFocus
+              />
             </Form.Group>
           </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <Modal.Footer className="d-flex flex-column flex-sm-row justify-content-sm-center gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setShowModal(false)}
+              className="w-100"
+              style={{ maxWidth: '220px' }}
+            >
               Скасувати
             </Button>
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="primary" className="w-100" style={{ maxWidth: '220px' }}>
               Зберегти
             </Button>
           </Modal.Footer>
         </Form>
       </Modal>
+
       <ConfirmModal
         show={showConfirm}
         message={`Ви впевнені що хочете видалити "${locationToDelete?.name}"?`}
         onConfirm={confirmDelete}
         onCancel={() => {
           setShowConfirm(false);
-          setLocatinoToDelete(null);
+          setLocationToDelete(null);
         }}
       />
     </div>

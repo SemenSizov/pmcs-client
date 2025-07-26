@@ -6,6 +6,8 @@ import ConfirmModal from '../components/ConfirmModal';
 import type { EquipmentType } from '../types/EquipmentType';
 import type { EquipmentUnit, EquipmentUnitDTO } from '../types/EquipmentUnit';
 import type { Location } from '../types/Location';
+import { Pencil, Trash } from 'react-bootstrap-icons';
+import OverlaySpinner from '../components/OverlaySpinner';
 
 export default function AdminEquipmentUnitsPage() {
   const [types, setTypes] = useState<EquipmentType[]>([]);
@@ -15,26 +17,42 @@ export default function AdminEquipmentUnitsPage() {
   const [editingUnit, setEditingUnit] = useState<EquipmentUnitDTO | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [unitToDelete, setUnitToDelete] = useState<EquipmentUnitDTO | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchUnits = () => {
+    setIsLoading(true);
     api
       .get('/equipment-units')
-      .then((res) => setUnits(res.data))
-      .catch((err) => console.error(err));
+      .then((res) => {
+        const units = res.data as EquipmentUnitDTO[];
+        units.sort((a: EquipmentUnitDTO, b: EquipmentUnitDTO) => a.location.name.localeCompare(b.location.name));
+        setUnits(units);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error('Не вдалося завантажити список обладнання');
+      })
+      .finally(() => setIsLoading(false));
   };
 
   const fetchTypes = () => {
     api
       .get('/equipment-types')
       .then((res) => setTypes(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err);
+        toast.error('Не вдалося завантажити типи обладнання');
+      });
   };
 
   const fetchLocations = () => {
     api
       .get('/locations')
       .then((res) => setLocations(res.data))
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err);
+        toast.error('Не вдалося завантажити список техніки');
+      });
   };
 
   useEffect(() => {
@@ -62,8 +80,9 @@ export default function AdminEquipmentUnitsPage() {
     if (!unitToDelete) return;
 
     try {
-      await api.delete(`/equipment-units/${unitToDelete.id}`).then(() => fetchUnits());
+      await api.delete(`/equipment-units/${unitToDelete.id}`);
       toast.success('Одиниця обладнання видалена');
+      fetchUnits();
     } catch (error) {
       console.error('Delete failed', error);
       toast.error('Помилка видалення одиниці обладнання');
@@ -78,62 +97,64 @@ export default function AdminEquipmentUnitsPage() {
     const form = event.currentTarget;
     const formData = new FormData(form);
     const unit: EquipmentUnit = {
-      id: editingUnit ? editingUnit.id : "0",
+      id: editingUnit ? editingUnit.id : '0',
       serial: formData.get('serial') as string,
-      equipmentTypeId:formData.get('equipmentTypeId') as string,
-      locationId:formData.get('locationId') as string
+      equipmentTypeId: formData.get('equipmentTypeId') as string,
+      locationId: formData.get('locationId') as string,
     };
 
-    if (editingUnit) {
-      api.put(`/equipment-units/${unit.id}`, unit).then(() => {
-        setShowModal(false);
-        fetchUnits();
-      });
-    } else {
-      api.post('/equipment-units', unit).then(() => {
-        setShowModal(false);
-        fetchUnits();
-      });
-    }
+    const action = editingUnit ? api.put(`/equipment-units/${unit.id}`, unit) : api.post('/equipment-units', unit);
+
+    action.then(() => {
+      setShowModal(false);
+      fetchUnits();
+    });
   };
-
   return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>Одиниці обладнання</h4>
-        <Button onClick={handleAdd}>Додати обладнання</Button>
+    <div className="position-relative">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
+        <h4 className="m-0">Одиниці обладнання</h4>
+        <Button onClick={handleAdd} className="w-100 w-md-auto" style={{ maxWidth: '220px' }}>
+          Додати обладнання
+        </Button>
       </div>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Серійни номер</th>
-            <th>Тип обладнання</th>
-            <th>Встановлено на техніку</th>
-            <th>Дії</th>
-          </tr>
-        </thead>
-        <tbody>
-          {units.map((u, idx) => (
-            <tr key={u.id}>
-              <td>{idx + 1}</td>
-              <td>{u.serial}</td>
-              <td>{u.equipmentType.name}</td>
-              <td>{u.location.name}</td>
-              <td>
-                <Button size="sm" variant="secondary" onClick={() => handleEdit(u)}>
-                  Редагувати
-                </Button>{' '}
-                <Button size="sm" variant="danger" onClick={() => requestDelete(u)}>
-                  Видалити
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <div className="table-responsive">
+        <Table striped bordered hover className="mb-4">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Тип обладнання</th>
+              <th>Серійний номер</th>
+              <th>Встановлено на техніку</th>
+              <th>Дії</th>
+            </tr>
+          </thead>
+          <tbody>
+            {units.map((u, idx) => (
+              <tr key={u.id}>
+                <td>{idx + 1}</td>
+                <td>{u.equipmentType.name}</td>
+                <td>{u.serial}</td>
+                <td>{u.location.name}</td>
+                <td>
+                  <div className="d-flex gap-2">
+                    <Button size="sm" variant="secondary" onClick={() => handleEdit(u)}>
+                      <Pencil />
+                    </Button>
+                    <Button size="sm" variant="danger" onClick={() => requestDelete(u)}>
+                      <Trash />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+      <OverlaySpinner show={isLoading} />
+
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
         <Modal.Header closeButton>
           <Modal.Title>{editingUnit ? 'Редагувати обладнання' : 'Додати обладнання'}</Modal.Title>
         </Modal.Header>
@@ -154,7 +175,7 @@ export default function AdminEquipmentUnitsPage() {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Серійний номер</Form.Label>
-              <Form.Control name="serial" defaultValue={editingUnit?.serial || ''} required />
+              <Form.Control name="serial" defaultValue={editingUnit?.serial || ''} required autoFocus />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Встановлено на техніку</Form.Label>
@@ -170,16 +191,22 @@ export default function AdminEquipmentUnitsPage() {
               </Form.Select>
             </Form.Group>
           </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <Modal.Footer className="d-flex flex-column flex-sm-row justify-content-sm-center gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setShowModal(false)}
+              className="w-100"
+              style={{ maxWidth: '220px' }}
+            >
               Скасувати
             </Button>
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="primary" className="w-100" style={{ maxWidth: '220px' }}>
               Зберегти
             </Button>
           </Modal.Footer>
         </Form>
       </Modal>
+
       <ConfirmModal
         show={showConfirm}
         message={`Ви впевнені що хочете видалити "${unitToDelete?.equipmentType.name}" з серійним номером "${unitToDelete?.serial}"?`}
