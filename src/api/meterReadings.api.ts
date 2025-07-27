@@ -1,7 +1,7 @@
 import api from './api';
 import type { MeterReading } from '../types/MeterReading';
 
-const METERS_ENDPOINT = '/meters'
+const METERS_ENDPOINT = '/meters-readings'
 
 export const getMeterReadings = (filters = {}) =>
   api.get<MeterReading[]>(METERS_ENDPOINT, { params: filters });

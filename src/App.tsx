@@ -45,8 +45,8 @@ function AppContent() {
           path="/meters"
           element={
             <ProtectedRoute>
-              <div></div>
-              {/* <MetersPage /> */}
+              {/* <div></div> */}
+              <MetersPage />
             </ProtectedRoute>
           }
         />
