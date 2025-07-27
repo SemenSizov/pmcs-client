@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
-import api from '../api/api';
 import ConfirmModal from '../components/ConfirmModal';
 import OverlaySpinner from '../components/OverlaySpinner';
 import { toast } from 'react-toastify';
 import type { User } from '../types/User';
 import { Pencil, Trash } from 'react-bootstrap-icons';
+import { addUser, deleteUser, fetchUsers as fetchUsersApi, updateUser } from '../api/users.api';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -17,8 +17,7 @@ export default function AdminUsersPage() {
 
   const fetchUsers = () => {
     setIsLoading(true);
-    api
-      .get('/users')
+    fetchUsersApi()
       .then((res) => {
         const sorted = [...res.data].sort((a, b) => a.name.localeCompare(b.name));
         setUsers(sorted);
@@ -53,7 +52,7 @@ export default function AdminUsersPage() {
     if (!userToDelete) return;
 
     try {
-      await api.delete(`/users/${userToDelete.id}`);
+      await deleteUser(userToDelete.id);
       toast.success('Користувача видалено');
       fetchUsers();
     } catch (error) {
@@ -73,12 +72,10 @@ export default function AdminUsersPage() {
       id: editingUser ? editingUser.id : Date.now(),
       name: formData.get('name') as string,
       email: formData.get('email') as string,
-      role: formData.get('role') as "user" | "admin",
+      role: formData.get('role') as 'user' | 'admin',
     };
 
-    const action = editingUser
-      ? api.put(`/users/${user.id}`, user)
-      : api.post('/users', user);
+    const action = editingUser ? updateUser(user) : addUser(user);
 
     action.then(() => {
       setShowModal(false);
@@ -139,21 +136,11 @@ export default function AdminUsersPage() {
           <Modal.Body>
             <Form.Group className="mb-3">
               <Form.Label>Імʼя</Form.Label>
-              <Form.Control
-                name="name"
-                defaultValue={editingUser?.name || ''}
-                required
-                autoFocus
-              />
+              <Form.Control name="name" defaultValue={editingUser?.name || ''} required autoFocus />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
-              <Form.Control
-                name="email"
-                type="email"
-                defaultValue={editingUser?.email || ''}
-                required
-              />
+              <Form.Control name="email" type="email" defaultValue={editingUser?.email || ''} required />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Роль</Form.Label>

@@ -1,39 +1,39 @@
-// AuthCallback.tsx
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api/api';
 import { toast } from 'react-toastify';
+import { useAuth } from '../auth/AuthProvider';
+import api from '../api/api';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   useEffect(() => {
     const handleAuth = async () => {
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
+
       if (!code) {
-        toast.error('Missing auth code');
+        toast.error('Код авторизації відсутній');
         return navigate('/user-not-found');
       }
 
       try {
         const res = await api.post('/auth/google/callback', { code });
-        console.log('Response from backend:', res.data);
         const { token } = res.data;
 
-        console.log('Received token, saving to localStorage');
-        localStorage.setItem('token', token);
-        window.location.href = '/'; // повне перезавантаження — AuthProvider ініціалізується
+        login(token); // зберігаємо токен у контекст
+        window.location.href = '/dashboard'; // повне перезавантаження (уникнення багів з контекстом)
       } catch (err: any) {
-        toast.error('Authorization failed');
+        toast.error('Авторизація не вдалася');
         navigate('/user-not-found');
       }
     };
 
     handleAuth();
-  }, [navigate]);
+  }, [navigate, login]);
 
-  return <p>Logging in...</p>;
+  return <p className="text-center mt-5">Виконується вхід...</p>;
 };
 
 export default AuthCallback;

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
-import api from '../api/api';
 import ConfirmModal from '../components/ConfirmModal';
 import OverlaySpinner from '../components/OverlaySpinner';
 import { toast } from 'react-toastify';
 import type { EquipmentType } from '../types/EquipmentType';
 import type { Procedure, ProcedureDTO } from '../types/Procedure';
 import { Pencil, Trash } from 'react-bootstrap-icons';
+import { addProcedure, deleteProcedure, getProcedures, updateProcedure } from '../api/procedures.api';
+import { getEquipmentTypes } from '../api/equipmentTypes.api';
 
 const periodMapping = {
   weekly: 'Щотижня',
@@ -37,8 +38,7 @@ export default function AdminProceduresPage() {
 
   const fetchProcedures = () => {
     setIsLoading(true);
-    api
-      .get('/procedures')
+    getProcedures()
       .then((res) => {
         setProcedures(res.data);
       })
@@ -50,8 +50,7 @@ export default function AdminProceduresPage() {
   };
 
   const fetchTypes = () => {
-    api
-      .get('/equipment-types')
+    getEquipmentTypes()
       .then((res) => setTypes(res.data))
       .catch((err) => {
         console.error(err);
@@ -88,7 +87,7 @@ export default function AdminProceduresPage() {
   const confirmDelete = async () => {
     if (!procedureToDelete) return;
     try {
-      await api.delete(`/procedures/${procedureToDelete.id}`);
+      await deleteProcedure(procedureToDelete.id);
       toast.success('Процедуру видалено');
       fetchProcedures();
     } catch (error) {
@@ -114,9 +113,9 @@ export default function AdminProceduresPage() {
 
     try {
       if (editingProcedure) {
-        await api.put(`/procedures/${procedure.id}`, procedure);
+        await updateProcedure(procedure)
       } else {
-        await api.post('/procedures', procedure);
+        await addProcedure(procedure)
       }
       toast.success('Процедура збережена');
       fetchProcedures();

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import api from '../api/api';
 import ConfirmModal from '../components/ConfirmModal';
 import OverlaySpinner from '../components/OverlaySpinner';
 import type { Location, LocationDTO } from '../types/Location';
 import { Pencil, Trash } from 'react-bootstrap-icons';
+import { addLocation, deleteLocation, getLocations, updateLocation } from '../api/locations.api';
 
 export default function AdminLocationsPage() {
   const [locations, setLocations] = useState<LocationDTO[]>([]);
@@ -17,8 +17,7 @@ export default function AdminLocationsPage() {
 
   const fetchLocations = () => {
     setIsLoading(true);
-    api
-      .get('/locations')
+    getLocations()
       .then((res) => {
         const sorted = [...res.data].sort((a, b) => a.name.localeCompare(b.name));
         setLocations(sorted);
@@ -53,7 +52,7 @@ export default function AdminLocationsPage() {
     if (!locationToDelete) return;
 
     try {
-      await api.delete(`/locations/${locationToDelete.id}`);
+      await deleteLocation(locationToDelete.id);
       toast.success('Техніка видалена');
       fetchLocations();
     } catch (error) {
@@ -75,8 +74,8 @@ export default function AdminLocationsPage() {
     };
 
     const action = editingLocation
-      ? api.put(`/locations/${location.id}`, location)
-      : api.post('/locations', location);
+      ? updateLocation(location)
+      : addLocation(location);
 
     action.then(() => {
       setShowModal(false);
@@ -113,7 +112,7 @@ export default function AdminLocationsPage() {
                     <ul className="mb-0">
                       {l.units.map((u) => (
                         <li key={u.id}>
-                          {u.equipmentType.name}, серійний: {u.serial}
+                          {u.equipmentType.name}, #{u.serial}
                         </li>
                       ))}
                     </ul>

@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './auth/AuthProvider';
+// App.tsx
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './auth/AuthProvider';
 import AuthCallback from './auth/AuthCallback';
 import NotFound from './auth/NotFound';
 import Dashboard from './pages/Dashboard';
@@ -9,12 +10,25 @@ import NavigationBar from './components/Navbar';
 import MetersPage from './pages/MetersPage';
 import PMCS from './pages/PMCS';
 import { ToastContainer } from 'react-toastify';
+import HomePage from './pages/HomePage'; // додай Home
 
-const App = () => (
-  <AuthProvider>
-    <BrowserRouter>
-      <NavigationBar />
+function AppContent() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-primary" role="status" />
+      </div>
+    );
+  }
+  const hideNavbar = location.pathname === '/' && !isAuthenticated;
+
+  return (
+    <>
+      {!hideNavbar && <NavigationBar />}
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/user-not-found" element={<NotFound />} />
 
@@ -22,27 +36,21 @@ const App = () => (
           path="/admin/*"
           element={
             <ProtectedRoute roles={['admin']}>
-              <AdminRoutes  />
+              <AdminRoutes />
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/meters"
           element={
             <ProtectedRoute>
-              <MetersPage />
+              <div></div>
+              {/* <MetersPage /> */}
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/pmcs"
           element={
@@ -51,10 +59,27 @@ const App = () => (
             </ProtectedRoute>
           }
         />
-      </Routes>
-    </BrowserRouter>  
-    <ToastContainer/>
-  </AuthProvider>
-);
 
-export default App;
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+      <ToastContainer />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}

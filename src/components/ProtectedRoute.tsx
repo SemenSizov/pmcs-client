@@ -1,36 +1,33 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
-import type { ReactNode } from 'react';
-import { Spinner } from 'react-bootstrap';
-import { redirectToGoogle } from '../auth/auth';
+import type { JSX } from 'react';
+
+type role ="user"|"admin"
 
 interface ProtectedRouteProps {
-  children: ReactNode;
-  roles?: ('admin' | 'user')[];
+  children: JSX.Element;
+  roles?: role[];
+  invert?: boolean;
 }
 
-const ProtectedRoute = ({ children, roles }: ProtectedRouteProps) => {
-  const { isAuthenticated, user, isLoading } = useAuth();
-  console.log({ isAuthenticated, user, isLoading });
+const ProtectedRoute = ({ children, roles, invert = false }: ProtectedRouteProps) => {
+  const { isAuthenticated, isLoading, user } = useAuth();
 
-  if (isLoading) {
-    return (
-      <div className="d-flex justify-content-center mt-5">
-        <Spinner animation="border" />
-      </div>
-    );
+  if (isLoading) return null;
+
+  if (invert && isAuthenticated) {
+    return <Navigate to="/" />;
   }
 
-  if (!isAuthenticated) {
-    redirectToGoogle();
-    return null;
+  if (!invert && !isAuthenticated) {
+    return <Navigate to="/home" />;
   }
 
-  if (roles && (!user?.role || !roles.includes(user.role))) {
-    return <Navigate to="/user-not-found" replace />;
+  if (roles && (!user || !roles.includes(user.role!))) {
+    return <Navigate to="/user-not-found" />;
   }
 
-  return <>{children}</>;
+  return children;
 };
 
-export default ProtectedRoute;
+export default ProtectedRoute

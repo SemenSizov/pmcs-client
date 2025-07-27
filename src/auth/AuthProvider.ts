@@ -54,6 +54,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     const decoded = jwtDecode<UserPayload>(token);
     setToken(token);
     setUser(decoded);
+    addAuthTokenToApi(token)
   };
 
   const logout = () => {

@@ -1,3 +1,4 @@
+// NavigationBar.tsx
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
 import {
@@ -8,20 +9,16 @@ import {
   Spinner,
   NavDropdown,
 } from 'react-bootstrap';
-import classNames from 'classnames';
 
 const NavigationBar = () => {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
-
-  const linkClassName = ({ isActive }: { isActive: boolean }) =>
-    classNames('nav-link', { active: isActive });
 
   if (isLoading) {
     return (
       <Navbar bg="dark" variant="dark" className="mb-3">
         <Container>
           <Navbar.Text className="text-light">
-            <Spinner animation="border" size="sm" className="me-2" /> Loading...
+            <Spinner animation="border" size="sm" className="me-2" /> Завантаження...
           </Navbar.Text>
         </Container>
       </Navbar>
@@ -41,27 +38,27 @@ const NavigationBar = () => {
           placement="end"
         >
           <Offcanvas.Header closeButton>
-            <Offcanvas.Title id="offcanvasNavbarLabel">Menu</Offcanvas.Title>
+            <Offcanvas.Title id="offcanvasNavbarLabel">Меню</Offcanvas.Title>
           </Offcanvas.Header>
           <Offcanvas.Body>
             <Nav className="justify-content-end flex-grow-1 pe-3">
-              <NavLink to="/" end className={linkClassName}>
-                Dashboard
-              </NavLink>
-              <NavLink to="/meters" className={linkClassName}>
-                Meters
-              </NavLink>
-              <NavLink to="/pmcs" className={linkClassName}>
-                PMCS
-              </NavLink>
+              <Nav.Link as={NavLink} to="/dashboard" end>
+                Головна
+              </Nav.Link>
+              <Nav.Link as={NavLink} to="/meters">
+                Показники мотогодин
+              </Nav.Link>
+              <Nav.Link as={NavLink} to="/pmcs">
+                Журнал обслуговування
+              </Nav.Link>
               {user?.role === 'admin' && (
-                <NavLink to="/admin" className={linkClassName}>
-                  Admin
-                </NavLink>
+                <Nav.Link as={NavLink} to="/admin">
+                  Налаштування
+                </Nav.Link>
               )}
             </Nav>
 
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <Nav className="mt-4">
                 <NavDropdown
                   title={user?.email}
@@ -70,12 +67,23 @@ const NavigationBar = () => {
                   className="w-100"
                 >
                   <NavDropdown.ItemText className="text-muted small">
-                    Signed in as<br />
+                    Ви увійшли як<br />
                     <strong>{user?.email}</strong>
                   </NavDropdown.ItemText>
                   <NavDropdown.Divider />
-                  <NavDropdown.Item onClick={logout}>Logout</NavDropdown.Item>
+                  <NavDropdown.Item onClick={logout} className="text-danger">
+                    Вийти
+                  </NavDropdown.Item>
                 </NavDropdown>
+              </Nav>
+            ) : (
+              <Nav className="mt-4">
+                <Nav.Link
+                  onClick={() => (window.location.href = '/auth/callback')}
+                  className="text-light"
+                >
+                  Увійти
+                </Nav.Link>
               </Nav>
             )}
           </Offcanvas.Body>

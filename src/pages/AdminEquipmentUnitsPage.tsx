@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import api from '../api/api';
 import ConfirmModal from '../components/ConfirmModal';
 import type { EquipmentType } from '../types/EquipmentType';
 import type { EquipmentUnit, EquipmentUnitDTO } from '../types/EquipmentUnit';
 import type { Location } from '../types/Location';
 import { Pencil, Trash } from 'react-bootstrap-icons';
 import OverlaySpinner from '../components/OverlaySpinner';
+import { addEquipmentUnit, deleteEquipmentUnit, getEquipmentUnits, updateEquipmentUnit } from '../api/equipmentUnits.api';
+import { getEquipmentTypes } from '../api/equipmentTypes.api';
+import { getLocations } from '../api/locations.api';
 
 export default function AdminEquipmentUnitsPage() {
   const [types, setTypes] = useState<EquipmentType[]>([]);
@@ -21,8 +23,7 @@ export default function AdminEquipmentUnitsPage() {
 
   const fetchUnits = () => {
     setIsLoading(true);
-    api
-      .get('/equipment-units')
+    getEquipmentUnits()
       .then((res) => {
         const units = res.data as EquipmentUnitDTO[];
         units.sort((a: EquipmentUnitDTO, b: EquipmentUnitDTO) => a.location.name.localeCompare(b.location.name));
@@ -36,8 +37,7 @@ export default function AdminEquipmentUnitsPage() {
   };
 
   const fetchTypes = () => {
-    api
-      .get('/equipment-types')
+    getEquipmentTypes()
       .then((res) => setTypes(res.data))
       .catch((err) => {
         console.error(err);
@@ -46,8 +46,7 @@ export default function AdminEquipmentUnitsPage() {
   };
 
   const fetchLocations = () => {
-    api
-      .get('/locations')
+    getLocations()
       .then((res) => setLocations(res.data))
       .catch((err) => {
         console.error(err);
@@ -80,7 +79,7 @@ export default function AdminEquipmentUnitsPage() {
     if (!unitToDelete) return;
 
     try {
-      await api.delete(`/equipment-units/${unitToDelete.id}`);
+      await deleteEquipmentUnit(+unitToDelete.id)
       toast.success('Одиниця обладнання видалена');
       fetchUnits();
     } catch (error) {
@@ -103,7 +102,7 @@ export default function AdminEquipmentUnitsPage() {
       locationId: formData.get('locationId') as string,
     };
 
-    const action = editingUnit ? api.put(`/equipment-units/${unit.id}`, unit) : api.post('/equipment-units', unit);
+    const action = editingUnit ? updateEquipmentUnit(unit) : addEquipmentUnit(unit);
 
     action.then(() => {
       setShowModal(false);

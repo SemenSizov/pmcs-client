@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import api from '../api/api';
 import ConfirmModal from '../components/ConfirmModal';
 import OverlaySpinner from '../components/OverlaySpinner';
 import type { EquipmentType } from '../types/EquipmentType';
 import { Pencil, Trash } from 'react-bootstrap-icons';
+import { addEquipmentType, deleteEquipmentType, getEquipmentTypes, updateEquipmentType } from '../api/equipmentTypes.api';
 
 export default function AdminEquipmentTypesPage() {
   const [types, setTypes] = useState<EquipmentType[]>([]);
@@ -17,8 +17,7 @@ export default function AdminEquipmentTypesPage() {
 
   const fetchTypes = () => {
     setIsLoading(true);
-    api
-      .get('/equipment-types')
+    getEquipmentTypes()
       .then((res) => {
         const sorted = [...res.data].sort((a: EquipmentType, b: EquipmentType) =>
           a.name.localeCompare(b.name)
@@ -55,7 +54,7 @@ export default function AdminEquipmentTypesPage() {
     if (!typeToDelete) return;
 
     try {
-      await api.delete(`/equipment-types/${typeToDelete.id}`);
+      await deleteEquipmentType(typeToDelete.id);
       toast.success('Тип обладнання видалено');
       fetchTypes();
     } catch (error) {
@@ -77,8 +76,8 @@ export default function AdminEquipmentTypesPage() {
     };
 
     const action = editingType
-      ? api.put(`/equipment-types/${type.id}`, type)
-      : api.post('/equipment-types', type);
+      ? updateEquipmentType(type)
+      : addEquipmentType(type)
 
     action.then(() => {
       setShowModal(false);
