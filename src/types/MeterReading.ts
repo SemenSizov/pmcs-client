@@ -7,3 +7,4 @@ export interface MeterReading {
   location: { id: number; name: string };
   unit: { id: number; name: string };
 }
+

@@ -81,7 +81,7 @@ export default function MetersPage() {
 
   useEffect(() => {
     fetchData();
-  }, [filters.page]);
+  }, [filters]);
 
   const handleFilterChange = (e: any) => {
     const { name, value } = e.target;
@@ -164,11 +164,11 @@ export default function MetersPage() {
               <Form.Control type="date" name="to_date" value={filters.to_date} onChange={handleFilterChange} />
             </Form.Group>
           </Col>
-          <Col md="auto">
+          {/* <Col md="auto">
             <Button variant="outline-secondary" onClick={fetchData}>
               Застосувати
             </Button>
-          </Col>
+          </Col> */}
         </Row>
 
         {loading ? (

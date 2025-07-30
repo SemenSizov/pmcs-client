@@ -27,7 +27,11 @@ api.interceptors.response.use(
     }
     if (error.response?.status === 401) {
       toast.error('Сесія завершена. Увійдіть знову.');
-      window.location.href = '/'
+      window.location.href = '/';
+    }
+    if (error.response?.status === 403) {
+      toast.error('Помилка авторизації. Увійдіть знову.');
+      window.location.href = '/';
     }
   }
 );

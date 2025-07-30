@@ -8,9 +8,9 @@ import AdminRoutes from './routes/AdminRoutes';
 import ProtectedRoute from './components/ProtectedRoute';
 import NavigationBar from './components/Navbar';
 import MetersPage from './pages/MetersPage';
-import PMCS from './pages/PMCS';
 import { ToastContainer } from 'react-toastify';
 import HomePage from './pages/HomePage'; // додай Home
+import LogEntriesPage from './pages/LogEntriesPage';
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -55,7 +55,7 @@ function AppContent() {
           path="/pmcs"
           element={
             <ProtectedRoute>
-              <PMCS />
+              <LogEntriesPage />
             </ProtectedRoute>
           }
         />
