@@ -3,7 +3,7 @@ export const logout = () => {
 };
 
 export const redirectToGoogle = () => {
-  const redirectUri = encodeURIComponent('http://localhost:5173/auth/callback');
+  const redirectUri = encodeURIComponent(import.meta.env.VITE_AUTH_CALLBACK);
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const scope = encodeURIComponent('openid email profile');
 
