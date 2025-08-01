@@ -26,11 +26,10 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
+    const storedToken = sessionStorage.getItem('token');
     if (storedToken) {
       try {
         const decoded = jwtDecode<UserPayload>(storedToken);
-        console.log('Decoded token:', decoded);
         setToken(storedToken);
         setUser(decoded);
         addAuthTokenToApi(storedToken)
@@ -50,7 +49,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = (token: string) => {
-    localStorage.setItem('token', token);
+    sessionStorage.setItem('token', token);
     const decoded = jwtDecode<UserPayload>(token);
     setToken(token);
     setUser(decoded);
