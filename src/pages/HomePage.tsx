@@ -33,14 +33,8 @@ export default function HomePage() {
       <Container className="py-5">
         <h1 className="mb-3 display-5 fw-bold">Ласкаво просимо до PMCS</h1>
         <p className="mb-4 fs-5">Щоб розпочати, увійдіть через Google</p>
-        <div className="d-grid gap-2 d-sm-inline-block">
-          <Button
-            variant="light"
-            size="lg"
-            className="w-100 w-sm-auto"
-            style={{ maxWidth: '280px' }}
-            onClick={redirectToGoogle}
-          >
+        <div className="d-flex justify-content-center">
+          <Button variant="light" size="lg" style={{ maxWidth: '280px', width: '100%' }} onClick={redirectToGoogle}>
             Увійти через Google
           </Button>
         </div>
