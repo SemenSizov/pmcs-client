@@ -63,11 +63,21 @@ const LogEntriesPage = () => {
     try {
       await addLogEntry(newEntry);
       toast.success('Запис додано');
-      setShowAddModal(false);
-      setFilters({ ...filters });
-      fetchData();
     } catch {
       toast.error('Помилка при додаванні');
+    } finally {
+      setModalLocation(undefined);
+      setModalUnit(undefined);
+      setNewEntry({
+        date: dayjs().format('YYYY-MM-DD'),
+        hours: null,
+        procedureId: 0,
+        unitId: 0,
+        userId: 0,
+      });
+      setShowAddModal(false);
+      setFilters({ ...filters });
+      fetchData(); // Refresh entries after adding
     }
   };
 

@@ -106,6 +106,14 @@ export default function MetersPage() {
       fetchData();
     } catch {
       toast.error('Помилка додавання');
+    } finally {
+      setFormData({
+        date: dayjs().format('YYYY-MM-DD'),
+        location_id: '',
+        unit_id: '',
+        hours: '',
+      });
+      setLastReading({ hours: 0, date: null });
     }
   };
 

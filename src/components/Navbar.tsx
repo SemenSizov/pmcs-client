@@ -1,17 +1,19 @@
 // NavigationBar.tsx
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
-import {
-  Navbar,
-  Nav,
-  Container,
-  Offcanvas,
-  Spinner,
-  NavDropdown,
-} from 'react-bootstrap';
+import { Navbar, Nav, Container, Offcanvas, Spinner, NavDropdown } from 'react-bootstrap';
+import { useState } from 'react';
 
 const NavigationBar = () => {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleClose = () => setShowMenu(false);
+  const handleShow = () => setShowMenu(true);
+
+  const handleNavItemClick = () => {
+    handleClose();
+  };
 
   if (isLoading) {
     return (
@@ -31,9 +33,11 @@ const NavigationBar = () => {
         <Navbar.Brand as={NavLink} to="/">
           PMCS
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="offcanvasNavbar" />
+        <Navbar.Toggle aria-controls="offcanvasNavbar" onClick={handleShow} />
         <Navbar.Offcanvas
           id="offcanvasNavbar"
+          show={showMenu}
+          onHide={handleClose}
           aria-labelledby="offcanvasNavbarLabel"
           placement="end"
         >
@@ -42,17 +46,17 @@ const NavigationBar = () => {
           </Offcanvas.Header>
           <Offcanvas.Body>
             <Nav className="justify-content-end flex-grow-1 pe-3">
-              <Nav.Link as={NavLink} to="/dashboard" end>
+              <Nav.Link as={NavLink} to="/dashboard" end onClick={handleNavItemClick}>
                 Головна
               </Nav.Link>
-              <Nav.Link as={NavLink} to="/meters">
+              <Nav.Link as={NavLink} to="/meters" onClick={handleNavItemClick}>
                 Показники мотогодин
               </Nav.Link>
               <Nav.Link as={NavLink} to="/pmcs">
                 Журнал обслуговування
               </Nav.Link>
               {user?.role === 'admin' && (
-                <Nav.Link as={NavLink} to="/admin">
+                <Nav.Link as={NavLink} to="/admin" onClick={handleNavItemClick}>
                   Налаштування
                 </Nav.Link>
               )}
@@ -60,18 +64,20 @@ const NavigationBar = () => {
 
             {isAuthenticated ? (
               <Nav className="mt-4">
-                <NavDropdown
-                  title={user?.email}
-                  id="user-nav-dropdown"
-                  align="end"
-                  className="w-100"
-                >
+                <NavDropdown title={user?.email} id="user-nav-dropdown" align="end" className="w-100">
                   <NavDropdown.ItemText className="text-muted small">
-                    Ви увійшли як<br />
+                    Ви увійшли як
+                    <br />
                     <strong>{user?.email}</strong>
                   </NavDropdown.ItemText>
                   <NavDropdown.Divider />
-                  <NavDropdown.Item onClick={logout} className="text-danger">
+                  <NavDropdown.Item
+                    onClick={() => {
+                      handleNavItemClick();
+                      logout();
+                    }}
+                    className="text-danger"
+                  >
                     Вийти
                   </NavDropdown.Item>
                 </NavDropdown>
@@ -79,7 +85,7 @@ const NavigationBar = () => {
             ) : (
               <Nav className="mt-4">
                 <Nav.Link
-                  onClick={() => (window.location.href = '/auth/callback')}
+                  onClick={() => (handleNavItemClick(), (window.location.href = '/auth/callback'))}
                   className="text-light"
                 >
                   Увійти
