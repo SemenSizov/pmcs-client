@@ -88,24 +88,15 @@ const STATUS_DOT_STYLE: React.CSSProperties = {
 
 // CSS-in-JS для кращого десктоп-лейаута без окремого файла
 const DASHBOARD_CSS = `
-/* Рівень запису: одна колонка на мобілці, 2 колонки на >= sm */
+/* Завжди одна колонка */
 .entry-row { display: flex; flex-direction: column; gap: .25rem; }
-@media (min-width: 576px) {
-  .entry-row { display: grid; grid-template-columns: 1fr auto; column-gap: 1rem; align-items: start; }
-}
 
-/* Заголовок процедури: на мобілці ламаємо де завгодно, на десктопі — нормальний перенос слів */
+/* Назва процедури: ламаємо довгі слова, без горизонтального скролу */
 .entry-title { overflow-wrap: anywhere; }
-@media (min-width: 576px) {
-  .entry-title { overflow-wrap: normal; word-break: normal; }
-}
 
-/* Лівий/правий блоки усередині запису */
-.entry-left { min-width: 0; }
+/* Внутрішні блоки */
+.entry-left  { min-width: 0; }
 .entry-right { text-align: start; }
-@media (min-width: 576px) {
-  .entry-right { text-align: end; min-width: 260px; }
-}
 `;
 
 export default function DashboardPage() {
@@ -199,9 +190,9 @@ export default function DashboardPage() {
                                   const sm = statusMeta(e.status);
                                   return (
                                     <ListGroup.Item key={`${e.procedure_name}:${i}`} className="py-2">
-                                      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-1">
+                                      <div className="entry-row">
                                         {/* Ліва частина */}
-                                        <div className="me-sm-3">
+                                        <div className="entry-left">
                                           <div className="d-flex align-items-center gap-2">
                                             <span
                                               className={sm.bgClass}
@@ -209,7 +200,7 @@ export default function DashboardPage() {
                                               title={sm.label}
                                               aria-label={sm.label}
                                             />
-                                            <div className="fw-semibold text-break">{e.procedure_name}</div>
+                                            <div className="fw-semibold entry-title">{e.procedure_name}</div>
                                             {/* Текстовий бейдж — схований на xs, видимий від sm */}
                                             <span className={`badge bg-${sm.variant} d-none d-sm-inline`}>
                                               {sm.label}
@@ -225,7 +216,7 @@ export default function DashboardPage() {
                                         </div>
 
                                         {/* Права частина */}
-                                        <div className="d-grid text-start text-sm-end small">
+                                        <div className="entry-right d-grid small">
                                           <div>
                                             <span className="text-muted me-1">Дата:</span>
                                             <strong>{fmtDate(e.last_log_date)}</strong>
