@@ -67,33 +67,29 @@ function fmtDate(s?: string | null) {
 }
 
 function diffDaysFromToday(ymd: string) {
-    const d = parseYMDtoUTC(ymd);
-    if (!d) throw new Error('Invalid date format. Expected YYYY-MM-DD');
+  const d = parseYMDtoUTC(ymd);
+  if (!d) throw new Error('Invalid date format. Expected YYYY-MM-DD');
 
-    const now = new Date();
-    const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-    const inputUTC = d.getTime();
+  const now = new Date();
+  const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const inputUTC = d.getTime();
 
-    const MS_PER_DAY = 24 * 60 * 60 * 1000;
-    return Math.round((inputUTC - todayUTC) / MS_PER_DAY);
+  const MS_PER_DAY = 24 * 60 * 60 * 1000;
+  return Math.round((inputUTC - todayUTC) / MS_PER_DAY);
 }
 
 function parseYMDtoUTC(ymd: string) {
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd);
-    if (!m) return null;
-    const y = +m[1],
-        mo = +m[2],
-        d = +m[3];
-    const dt = new Date(Date.UTC(y, mo - 1, d));
-    // Валідація на випадок 2025-02-31 тощо
-    if (
-        dt.getUTCFullYear() !== y ||
-        dt.getUTCMonth() !== mo - 1 ||
-        dt.getUTCDate() !== d
-    ) {
-        return null;
-    }
-    return dt;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd);
+  if (!m) return null;
+  const y = +m[1],
+    mo = +m[2],
+    d = +m[3];
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  // Валідація на випадок 2025-02-31 тощо
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) {
+    return null;
+  }
+  return dt;
 }
 
 function statusMeta(status?: 'ok' | 'warning' | 'error') {
@@ -255,18 +251,20 @@ export default function DashboardPage() {
                                             <span className="text-muted me-1">Мотогодини:</span>
                                             <span className="fw-semibold">{valOrDash(e.last_log_hours)}</span>
                                           </div>
-                                          {e.status !== 'ok' && e.last_meter_hours !== null && (
-                                            <div>
-                                              <span className="text-muted me-1">До наступної:</span>
-                                              {e.procedure_type === 'hours' ? (
-                                                <strong>
-                                                  {e.last_meter_hours + e.procedure_hours - e.last_meter_hours} годин
-                                                </strong>
-                                              ) : (
-                                                <strong>{diffDaysFromToday(fmtDate(e.last_log_date))} днів</strong>
-                                              )}
-                                            </div>
-                                          )}
+                                          {e.status !== 'ok' &&
+                                            e.last_meter_hours !== null &&
+                                            e.last_log_hours !== null && (
+                                              <div>
+                                                <span className="text-muted me-1">До наступної:</span>
+                                                {e.procedure_type === 'hours' ? (
+                                                  <strong>
+                                                    {e.last_log_hours + e.procedure_hours - e.last_meter_hours} годин
+                                                  </strong>
+                                                ) : (
+                                                  <strong>{diffDaysFromToday(fmtDate(e.last_log_date))} днів</strong>
+                                                )}
+                                              </div>
+                                            )}
                                         </div>
                                       </div>
                                     </ListGroup.Item>
