@@ -228,7 +228,7 @@ export default function DashboardPage() {
                                         <div className="d-grid text-start text-sm-end small">
                                           <div>
                                             <span className="text-muted me-1">Дата:</span>
-                                            <strong>{e.last_log_date || '—'}</strong>
+                                            <strong>{fmtDate(e.last_log_date)}</strong>
                                           </div>
                                           <div>
                                             <span className="text-muted me-1">Мотогодини:</span>
