@@ -3,7 +3,7 @@ import { Button, Modal, Form, Table, Spinner, Row, Col, Pagination, Container } 
 import dayjs from 'dayjs';
 import { getMeterReadings, addMeterReading, getLastReading } from '../api/meterReadings.api';
 import type { MeterReading } from '../types/MeterReading';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import { getLocations } from '../api/locations.api';
 import { getEquipmentUnits } from '../api/equipmentUnits.api';
 import type { EquipmentUnitDTO } from '../types/EquipmentUnit';
@@ -120,6 +120,7 @@ export default function MetersPage() {
   return (
     <div style={{ overflow: 'hidden' }}>
       <Container>
+        <ToastContainer />
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h4>Показники мотогодин</h4>
           <Button onClick={() => setShowModal(true)}>Додати</Button>
