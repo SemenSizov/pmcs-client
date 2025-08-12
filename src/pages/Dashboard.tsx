@@ -251,7 +251,7 @@ export default function DashboardPage() {
                                             <span className="text-muted me-1">Мотогодини:</span>
                                             <span className="fw-semibold">{valOrDash(e.last_log_hours)}</span>
                                           </div>
-                                          {e.status !== 'ok' &&
+                                          {//e.status !== 'ok' &&
                                             e.last_meter_hours !== null &&
                                             e.last_log_hours !== null && (
                                               <div>
