@@ -25,6 +25,7 @@ export interface DashboardEntry {
 export interface UnitGroup {
   serial: string;
   equipment_type: string;
+  hours: number | null;
   entries: DashboardEntry[];
 }
 
@@ -132,7 +133,7 @@ export default function DashboardPage() {
 
               <Card.Body className="py-2">
                 {loc.units.length === 0 ? (
-                  <div className="text-muted small">Юнітів у локації немає</div>
+                  <div className="text-muted small">Обладнання відсутнє</div>
                 ) : (
                   <Accordion alwaysOpen flush>
                     {loc.units.map((u, idx) => (
@@ -141,6 +142,7 @@ export default function DashboardPage() {
                           <div className="d-flex flex-column">
                             <span className="fw-semibold text-break fs-6">{u.serial}</span>
                             <small className="text-muted">{u.equipment_type}</small>
+                            <small className="text-muted">Мотогодини: {u.hours || '--'}</small>
                           </div>
                         </Accordion.Header>
                         <Accordion.Body className="py-2">
@@ -171,16 +173,12 @@ export default function DashboardPage() {
                                       {/* Права частина */}
                                       <div className="d-grid text-start text-sm-end small">
                                         <div>
-                                          <span className="text-muted me-1">Останній лог:</span>
+                                          <span className="text-muted me-1">Дата:</span>
                                           <strong>{e.last_log_date || '—'}</strong>
                                         </div>
                                         <div>
-                                          <span className="text-muted me-1">Лог мотогод.:</span>
+                                          <span className="text-muted me-1">Мотогодини:</span>
                                           <span className="fw-semibold">{valOrDash(e.last_log_hours)}</span>
-                                        </div>
-                                        <div>
-                                          <span className="text-muted me-1">Лічильник:</span>
-                                          <span className="fw-semibold">{valOrDash(e.last_meter_hours)}</span>
                                         </div>
                                       </div>
                                     </div>
