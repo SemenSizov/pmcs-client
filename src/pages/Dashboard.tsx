@@ -258,7 +258,7 @@ export default function DashboardPage() {
                                           {e.status !== 'ok' && e.last_meter_hours !== null && (
                                             <div>
                                               <span className="text-muted me-1">До наступної:</span>
-                                              {e.equipment_type === 'hours' ? (
+                                              {e.procedure_type === 'hours' ? (
                                                 <strong>
                                                   {e.last_meter_hours + e.procedure_hours - e.last_meter_hours} годин
                                                 </strong>
