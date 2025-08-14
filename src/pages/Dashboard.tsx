@@ -202,17 +202,26 @@ export default function DashboardPage() {
                         <Accordion.Item eventKey={String(idx)} key={`${loc.id}:${u.serial}`}>
                           <Accordion.Header>
                             <div className="d-flex flex-column">
-                              <span className="fw-semibold text-break fs-6">{u.serial}</span>
+                              <div>
+                                {u.entries.some((e) => e.status !== 'ok') ? (
+                                  <span
+                                    className="bg-warning"
+                                    style={STATUS_DOT_STYLE}
+                                    title="Увага"
+                                    aria-label="Увага"
+                                  />
+                                ) : (
+                                  <span
+                                    className="bg-success"
+                                    style={STATUS_DOT_STYLE}
+                                    title="OK"
+                                    aria-label="OK"
+                                  />
+                                )}
+                                <span className="fw-semibold text-break fs-6">{u.serial}</span>
+                              </div>
                               <small className="text-muted">{u.equipment_type}</small>
                               <small className="text-muted">Мотогодини: {u.hours || '--'}</small>
-                              {u.entries.some((e) => e.status !== 'ok') && (
-                                <span
-                                  className="bg-warning"
-                                  style={STATUS_DOT_STYLE}
-                                  title="Увага"
-                                  aria-label="warning"
-                                />
-                              )}
                             </div>
                           </Accordion.Header>
                           <Accordion.Body className="py-2">
