@@ -276,7 +276,22 @@ const LogEntriesPage = () => {
           </>
         )}
 
-        <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+        <Modal
+          show={showAddModal}
+          onHide={() => {
+            setModalLocation(undefined);
+            setModalUnit(undefined);
+            setNewEntry({
+              date: dayjs().format('YYYY-MM-DD'),
+              hours: null,
+              procedureId: 0,
+              unitId: 0,
+              userId: 0,
+            });
+            setShowAddModal(false);
+            setFilters({ ...filters });
+          }}
+        >
           <Modal.Header closeButton>
             <Modal.Title>Новий запис</Modal.Title>
           </Modal.Header>
@@ -308,7 +323,7 @@ const LogEntriesPage = () => {
                     setModalUnit(units.find((u) => String(u.id) === e.target.value));
                   }}
                 >
-                  <option disabled>Оберіть обладнання</option>
+                  <option>Оберіть обладнання</option>
                   {modalLocation?.units.map((u) => (
                     <option key={u.id} value={u.id}>
                       {u.equipmentType.name}:{u.serial}
