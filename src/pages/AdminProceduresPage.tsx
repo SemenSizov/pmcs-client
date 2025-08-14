@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import ConfirmModal from '../components/ConfirmModal';
 import OverlaySpinner from '../components/OverlaySpinner';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import type { EquipmentType } from '../types/EquipmentType';
 import type { Procedure, ProcedureDTO } from '../types/Procedure';
 import { Pencil, Trash } from 'react-bootstrap-icons';
@@ -127,6 +127,7 @@ export default function AdminProceduresPage() {
 
   return (
     <div className="position-relative">
+      <ToastContainer />
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
         <h4 className="m-0">Регламентні процедури</h4>
         <Button onClick={handleAdd} className="w-100 w-md-auto" style={{ maxWidth: '220px' }}>

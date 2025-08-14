@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import ConfirmModal from '../components/ConfirmModal';
 import OverlaySpinner from '../components/OverlaySpinner';
 import type { Location, LocationDTO } from '../types/Location';
@@ -85,6 +85,7 @@ export default function AdminLocationsPage() {
 
   return (
     <div className="position-relative">
+      <ToastContainer />
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
         <h4 className="m-0">Одиниці техніки</h4>
         <Button onClick={handleAdd} className="w-100 w-md-auto" style={{ maxWidth: '220px' }}>

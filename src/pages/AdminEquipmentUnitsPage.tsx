@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import ConfirmModal from '../components/ConfirmModal';
 import type { EquipmentType } from '../types/EquipmentType';
 import type { EquipmentUnit, EquipmentUnitDTO } from '../types/EquipmentUnit';
@@ -111,6 +111,7 @@ export default function AdminEquipmentUnitsPage() {
   };
   return (
     <div className="position-relative">
+      <ToastContainer />
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
         <h4 className="m-0">Одиниці обладнання</h4>
         <Button onClick={handleAdd} className="w-100 w-md-auto" style={{ maxWidth: '220px' }}>
