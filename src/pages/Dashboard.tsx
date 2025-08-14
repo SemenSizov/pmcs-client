@@ -205,6 +205,14 @@ export default function DashboardPage() {
                               <span className="fw-semibold text-break fs-6">{u.serial}</span>
                               <small className="text-muted">{u.equipment_type}</small>
                               <small className="text-muted">Мотогодини: {u.hours || '--'}</small>
+                              {u.entries.some((e) => e.status !== 'ok') && (
+                                <span
+                                  className="bg-warning"
+                                  style={STATUS_DOT_STYLE}
+                                  title="Увага"
+                                  aria-label="warning"
+                                />
+                              )}
                             </div>
                           </Accordion.Header>
                           <Accordion.Body className="py-2">
@@ -251,9 +259,9 @@ export default function DashboardPage() {
                                             <span className="text-muted me-1">Мотогодини:</span>
                                             <span className="fw-semibold">{valOrDash(e.last_log_hours)}</span>
                                           </div>
-                                          {//e.status !== 'ok' &&
-                                            e.last_meter_hours !== null &&
-                                            e.last_log_hours !== null && (
+                                          {
+                                            //e.status !== 'ok' &&
+                                            e.last_meter_hours !== null && e.last_log_hours !== null && (
                                               <div>
                                                 <span className="text-muted me-1">До наступної:</span>
                                                 {e.procedure_type === 'hours' ? (
@@ -264,7 +272,8 @@ export default function DashboardPage() {
                                                   <strong>{diffDaysFromToday(fmtDate(e.last_log_date))} днів</strong>
                                                 )}
                                               </div>
-                                            )}
+                                            )
+                                          }
                                         </div>
                                       </div>
                                     </ListGroup.Item>
