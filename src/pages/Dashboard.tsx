@@ -202,7 +202,7 @@ export default function DashboardPage() {
                         <Accordion.Item eventKey={String(idx)} key={`${loc.id}:${u.serial}`}>
                           <Accordion.Header>
                             <div className="d-flex flex-column">
-                              <div>
+                              <div className="d-flex align-items-center gap-2">
                                 {u.entries.some((e) => e.status !== 'ok') ? (
                                   <span
                                     className="bg-warning"
