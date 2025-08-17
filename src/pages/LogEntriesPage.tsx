@@ -123,12 +123,12 @@ const LogEntriesPage = () => {
                       .filter((u) => u.location.id == filters.locationId)
                       .map((unit) => (
                         <option key={unit.id} value={unit.id}>
-                          {unit.equipmentType.name}:{unit.serial}
+                          {unit.equipmentType.name} S/n:{unit.serial}
                         </option>
                       ))
                   : units.map((unit) => (
                       <option key={unit.id} value={unit.id}>
-                        {unit.equipmentType.name}:{unit.serial}
+                        {unit.equipmentType.name} S/n:{unit.serial}
                       </option>
                     ))}
               </Form.Select>
@@ -211,7 +211,7 @@ const LogEntriesPage = () => {
                     <tr key={entry.id}>
                       <td>{entry.unit.location.name}</td>
                       <td>
-                        {entry.unit.equipmentType.name}:{entry.unit.serial}
+                        {entry.unit.equipmentType.name} S/n:{entry.unit.serial}
                       </td>
                       <td>{entry.procedure.name}</td>
                       <td>{dayjs(entry.date).format('YYYY-MM-DD')}</td>
@@ -326,7 +326,7 @@ const LogEntriesPage = () => {
                   <option>Оберіть обладнання</option>
                   {modalLocation?.units.map((u) => (
                     <option key={u.id} value={u.id}>
-                      {u.equipmentType.name}:{u.serial}
+                      {u.equipmentType.name} S/n:{u.serial}
                     </option>
                   ))}
                 </Form.Select>

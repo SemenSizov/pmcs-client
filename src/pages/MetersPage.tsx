@@ -150,12 +150,12 @@ export default function MetersPage() {
                       .filter((u) => String(u.location.id) === filters.location_id)
                       .map((u) => (
                         <option key={u.id} value={u.id}>
-                          {u.equipmentType.name} SN:{u.serial}
+                          {u.equipmentType.name} S/n:{u.serial}
                         </option>
                       ))
                   : units.map((u) => (
                       <option key={u.id} value={u.id}>
-                        {u.equipmentType.name} SN:{u.serial}
+                        {u.equipmentType.name} S/n:{u.serial}
                       </option>
                     ))}
               </Form.Select>
@@ -202,7 +202,7 @@ export default function MetersPage() {
                   <tr key={r.id}>
                     <td>{dayjs(r.date).format('YYYY-MM-DD')}</td>
                     <td>{location?.name}</td>
-                    <td>{unit ? `${unit.equipmentType.name} SN:${unit.serial}` : '—'}</td>
+                    <td>{unit ? `${unit.equipmentType.name} S/n:${unit.serial}` : '—'}</td>
                     <td>{r.hours}</td>
                   </tr>
                 );
@@ -296,7 +296,7 @@ export default function MetersPage() {
                     .filter((u) => String(u.location.id) === formData.location_id && u.equipmentType.hasHourmeter)
                     .map((u) => (
                       <option key={u.id} value={u.id}>
-                        {u.equipmentType.name} SN:{u.serial}
+                        {u.equipmentType.name} S/n:{u.serial}
                       </option>
                     ))}
                 </Form.Select>
