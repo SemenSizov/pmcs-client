@@ -7,7 +7,12 @@ import type { EquipmentUnit, EquipmentUnitDTO } from '../types/EquipmentUnit';
 import type { Location } from '../types/Location';
 import { Pencil, Trash } from 'react-bootstrap-icons';
 import OverlaySpinner from '../components/OverlaySpinner';
-import { addEquipmentUnit, deleteEquipmentUnit, getEquipmentUnits, updateEquipmentUnit } from '../api/equipmentUnits.api';
+import {
+  addEquipmentUnit,
+  deleteEquipmentUnit,
+  getEquipmentUnits,
+  updateEquipmentUnit,
+} from '../api/equipmentUnits.api';
 import { getEquipmentTypes } from '../api/equipmentTypes.api';
 import { getLocations } from '../api/locations.api';
 
@@ -79,7 +84,7 @@ export default function AdminEquipmentUnitsPage() {
     if (!unitToDelete) return;
 
     try {
-      await deleteEquipmentUnit(+unitToDelete.id)
+      await deleteEquipmentUnit(+unitToDelete.id);
       toast.success('Одиниця обладнання видалена');
       fetchUnits();
     } catch (error) {
@@ -100,14 +105,18 @@ export default function AdminEquipmentUnitsPage() {
       serial: formData.get('serial') as string,
       equipmentTypeId: formData.get('equipmentTypeId') as string,
       locationId: formData.get('locationId') as string,
+      hasHourmeter: Boolean(formData.get('hasHourmeter')),
     };
 
     const action = editingUnit ? updateEquipmentUnit(unit) : addEquipmentUnit(unit);
 
-    action.then(() => {
-      setShowModal(false);
-      fetchUnits();
-    });
+    action
+      .then(() => {
+        toast.success('Збережено');
+        setShowModal(false);
+        fetchUnits();
+      })
+      .catch(() => toast.error('Помилка збереження'));
   };
   return (
     <div className="position-relative">
@@ -127,6 +136,7 @@ export default function AdminEquipmentUnitsPage() {
               <th>Тип обладнання</th>
               <th>Серійний номер</th>
               <th>Встановлено на техніку</th>
+              <th>Лічильник мотогодин</th>
               <th>Дії</th>
             </tr>
           </thead>
@@ -137,6 +147,7 @@ export default function AdminEquipmentUnitsPage() {
                 <td>{u.equipmentType.name}</td>
                 <td>{u.serial}</td>
                 <td>{u.location.name}</td>
+                <td>{u.hasHourmeter ? 'Так' : 'Ні'}</td>
                 <td>
                   <div className="d-flex gap-2">
                     <Button size="sm" variant="secondary" onClick={() => handleEdit(u)}>
@@ -189,6 +200,14 @@ export default function AdminEquipmentUnitsPage() {
                   </option>
                 ))}
               </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-1">
+              <Form.Check
+                name="hasHourmeter"
+                type="checkbox"
+                label="Лічильник мотогодин"
+                defaultChecked={editingUnit?.hasHourmeter ?? false}
+              />
             </Form.Group>
           </Modal.Body>
           <Modal.Footer className="d-flex flex-column flex-sm-row justify-content-sm-center gap-2">
