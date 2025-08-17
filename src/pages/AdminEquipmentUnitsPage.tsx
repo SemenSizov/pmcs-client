@@ -105,7 +105,6 @@ export default function AdminEquipmentUnitsPage() {
       serial: formData.get('serial') as string,
       equipmentTypeId: formData.get('equipmentTypeId') as string,
       locationId: formData.get('locationId') as string,
-      hasHourmeter: Boolean(formData.get('hasHourmeter')),
     };
 
     const action = editingUnit ? updateEquipmentUnit(unit) : addEquipmentUnit(unit);
@@ -136,7 +135,6 @@ export default function AdminEquipmentUnitsPage() {
               <th>Тип обладнання</th>
               <th>Серійний номер</th>
               <th>Встановлено на техніку</th>
-              <th>Лічильник мотогодин</th>
               <th>Дії</th>
             </tr>
           </thead>
@@ -147,7 +145,6 @@ export default function AdminEquipmentUnitsPage() {
                 <td>{u.equipmentType.name}</td>
                 <td>{u.serial}</td>
                 <td>{u.location.name}</td>
-                <td>{u.hasHourmeter ? 'Так' : 'Ні'}</td>
                 <td>
                   <div className="d-flex gap-2">
                     <Button size="sm" variant="secondary" onClick={() => handleEdit(u)}>
@@ -200,14 +197,6 @@ export default function AdminEquipmentUnitsPage() {
                   </option>
                 ))}
               </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-1">
-              <Form.Check
-                name="hasHourmeter"
-                type="checkbox"
-                label="Лічильник мотогодин"
-                defaultChecked={editingUnit?.hasHourmeter ?? false}
-              />
             </Form.Group>
           </Modal.Body>
           <Modal.Footer className="d-flex flex-column flex-sm-row justify-content-sm-center gap-2">

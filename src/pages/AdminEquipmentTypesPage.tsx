@@ -5,7 +5,12 @@ import ConfirmModal from '../components/ConfirmModal';
 import OverlaySpinner from '../components/OverlaySpinner';
 import type { EquipmentType } from '../types/EquipmentType';
 import { Pencil, Trash } from 'react-bootstrap-icons';
-import { addEquipmentType, deleteEquipmentType, getEquipmentTypes, updateEquipmentType } from '../api/equipmentTypes.api';
+import {
+  addEquipmentType,
+  deleteEquipmentType,
+  getEquipmentTypes,
+  updateEquipmentType,
+} from '../api/equipmentTypes.api';
 
 export default function AdminEquipmentTypesPage() {
   const [types, setTypes] = useState<EquipmentType[]>([]);
@@ -19,9 +24,7 @@ export default function AdminEquipmentTypesPage() {
     setIsLoading(true);
     getEquipmentTypes()
       .then((res) => {
-        const sorted = [...res.data].sort((a: EquipmentType, b: EquipmentType) =>
-          a.name.localeCompare(b.name)
-        );
+        const sorted = [...res.data].sort((a: EquipmentType, b: EquipmentType) => a.name.localeCompare(b.name));
         setTypes(sorted);
       })
       .catch((err) => {
@@ -73,16 +76,18 @@ export default function AdminEquipmentTypesPage() {
     const type: EquipmentType = {
       id: editingType ? editingType.id : 0,
       name: formData.get('name') as string,
+      hasHourmeter: Boolean(formData.get('hasHourmeter')),
     };
 
-    const action = editingType
-      ? updateEquipmentType(type)
-      : addEquipmentType(type)
+    const action = editingType ? updateEquipmentType(type) : addEquipmentType(type);
 
-    action.then(() => {
-      setShowModal(false);
-      fetchTypes();
-    });
+    action
+      .then(() => {
+        toast.success('Збережено');
+        setShowModal(false);
+        fetchTypes();
+      })
+      .catch(() => toast.error('Помилка збереження'));
   };
 
   return (
@@ -101,6 +106,7 @@ export default function AdminEquipmentTypesPage() {
             <tr>
               <th>#</th>
               <th>Назва</th>
+              <th>Лічильник мотогодин</th>
               <th>Дії</th>
             </tr>
           </thead>
@@ -109,6 +115,7 @@ export default function AdminEquipmentTypesPage() {
               <tr key={t.id}>
                 <td>{idx + 1}</td>
                 <td>{t.name}</td>
+                <td>{t.hasHourmeter ? 'Так' : 'Ні'}</td>
                 <td>
                   <div className="d-flex gap-2">
                     <Button size="sm" variant="secondary" onClick={() => handleEdit(t)}>
@@ -135,11 +142,14 @@ export default function AdminEquipmentTypesPage() {
           <Modal.Body>
             <Form.Group className="mb-3">
               <Form.Label>Назва</Form.Label>
-              <Form.Control
-                name="name"
-                defaultValue={editingType?.name || ''}
-                required
-                autoFocus
+              <Form.Control name="name" defaultValue={editingType?.name || ''} required autoFocus />
+            </Form.Group>
+            <Form.Group className="mb-1">
+              <Form.Check
+                name="hasHourmeter"
+                type="checkbox"
+                label="Лічильник мотогодин"
+                defaultChecked={editingType?.hasHourmeter ?? false}
               />
             </Form.Group>
           </Modal.Body>
@@ -152,12 +162,7 @@ export default function AdminEquipmentTypesPage() {
             >
               Скасувати
             </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              className="w-100"
-              style={{ maxWidth: '220px' }}
-            >
+            <Button type="submit" variant="primary" className="w-100" style={{ maxWidth: '220px' }}>
               Зберегти
             </Button>
           </Modal.Footer>
