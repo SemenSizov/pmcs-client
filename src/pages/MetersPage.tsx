@@ -144,18 +144,18 @@ export default function MetersPage() {
             <Form.Group>
               <Form.Label>Обладнання</Form.Label>
               <Form.Select name="unit_id" value={filters.unit_id} onChange={handleFilterChange}>
-                <option value="">Всі одиниці</option>
+                <option value="">Все обладнання</option>
                 {filters.location_id
                   ? units
                       .filter((u) => String(u.location.id) === filters.location_id)
                       .map((u) => (
                         <option key={u.id} value={u.id}>
-                          {u.equipmentType.name}:{u.serial}
+                          {u.equipmentType.name} SN:{u.serial}
                         </option>
                       ))
                   : units.map((u) => (
                       <option key={u.id} value={u.id}>
-                        {u.equipmentType.name}:{u.serial}
+                        {u.equipmentType.name} SN:{u.serial}
                       </option>
                     ))}
               </Form.Select>
@@ -190,7 +190,7 @@ export default function MetersPage() {
               <tr>
                 <th>Дата</th>
                 <th>Техніка</th>
-                <th>Одиниця</th>
+                <th>Обладнання</th>
                 <th>Мотогодини</th>
               </tr>
             </thead>
@@ -202,7 +202,7 @@ export default function MetersPage() {
                   <tr key={r.id}>
                     <td>{dayjs(r.date).format('YYYY-MM-DD')}</td>
                     <td>{location?.name}</td>
-                    <td>{unit ? `${unit.equipmentType.name}: ${unit.serial}` : '—'}</td>
+                    <td>{unit ? `${unit.equipmentType.name} SN:${unit.serial}` : '—'}</td>
                     <td>{r.hours}</td>
                   </tr>
                 );
@@ -296,7 +296,7 @@ export default function MetersPage() {
                     .filter((u) => String(u.location.id) === formData.location_id && u.equipmentType.hasHourmeter)
                     .map((u) => (
                       <option key={u.id} value={u.id}>
-                        {u.equipmentType.name}:{u.serial}
+                        {u.equipmentType.name} SN:{u.serial}
                       </option>
                     ))}
                 </Form.Select>

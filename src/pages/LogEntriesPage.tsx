@@ -117,7 +117,7 @@ const LogEntriesPage = () => {
                 value={filters.unitId ?? ''}
                 onChange={(e) => handleFilterChange('unitId', e.target.value || undefined)}
               >
-                <option value="">Всі одиниці</option>
+                <option value="">Все обладнання</option>
                 {filters.locationId
                   ? units
                       .filter((u) => u.location.id == filters.locationId)
@@ -200,7 +200,7 @@ const LogEntriesPage = () => {
                 <thead>
                   <tr>
                     <th>Техніка</th>
-                    <th>Одиниця</th>
+                    <th>Обладнання</th>
                     <th>Процедура</th>
                     <th>Дата</th>
                     <th>Мотогодини</th>
