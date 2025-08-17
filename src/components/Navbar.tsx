@@ -52,7 +52,7 @@ const NavigationBar = () => {
               <Nav.Link as={NavLink} to="/meters" onClick={handleNavItemClick}>
                 Показники мотогодин
               </Nav.Link>
-              <Nav.Link as={NavLink} to="/pmcs">
+              <Nav.Link as={NavLink} to="/pmcs" onClick={handleNavItemClick}>
                 Журнал обслуговування
               </Nav.Link>
               {user?.role === 'admin' && (
