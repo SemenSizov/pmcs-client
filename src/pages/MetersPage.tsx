@@ -293,7 +293,7 @@ export default function MetersPage() {
                     Оберіть обладнання
                   </option>
                   {units
-                    .filter((u) => String(u.location.id) === formData.location_id)
+                    .filter((u) => String(u.location.id) === formData.location_id && u.equipmentType.hasHourmeter)
                     .map((u) => (
                       <option key={u.id} value={u.id}>
                         {u.equipmentType.name}:{u.serial}
