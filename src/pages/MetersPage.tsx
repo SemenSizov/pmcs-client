@@ -364,7 +364,7 @@ export default function MetersPage() {
       </Container>
       <ConfirmModal
         show={showConfirm}
-        message={`Ви впевнені що хочете видалити значення ${meterToDelete?.hours} мотогодини для "${meterToDelete?.unit.name}"?`}
+        message={`Ви впевнені що хочете видалити значення ${meterToDelete?.hours} мотогодин?`}
         onConfirm={confirmDelete}
         onCancel={() => {
           setShowConfirm(false);
