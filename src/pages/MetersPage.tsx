@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Button, Modal, Form, Table, Spinner, Row, Col, Pagination, Container } from 'react-bootstrap';
 import dayjs from 'dayjs';
-import { getMeterReadings, addMeterReading, getLastReading } from '../api/meterReadings.api';
+import { getMeterReadings, addMeterReading, getLastReading, deleteMeterReading } from '../api/meterReadings.api';
 import type { MeterReading } from '../types/MeterReading';
 import { toast, ToastContainer } from 'react-toastify';
 import { getLocations } from '../api/locations.api';
 import { getEquipmentUnits } from '../api/equipmentUnits.api';
 import type { EquipmentUnitDTO } from '../types/EquipmentUnit';
 import type { LocationDTO } from '../types/Location';
+import { useAuth } from '../auth/AuthProvider';
+import { Trash } from 'react-bootstrap-icons';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function MetersPage() {
+  const { user } = useAuth();
   const [readings, setReadings] = useState<MeterReading[]>([]);
   const [locations, setLocations] = useState<LocationDTO[]>([]);
   const [units, setUnits] = useState<EquipmentUnitDTO[]>([]);
@@ -20,6 +24,8 @@ export default function MetersPage() {
     hours: 0,
     date: null,
   });
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [meterToDelete, setMeterToDelete] = useState<MeterReading | null>(null);
 
   const fetchLastReading = async (unitId: string) => {
     try {
@@ -87,6 +93,27 @@ export default function MetersPage() {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value, page: 1 }));
   };
+
+  const requestDelete = (meter: MeterReading) => {
+    setMeterToDelete(meter);
+    setShowConfirm(true);
+  };
+
+    const confirmDelete = async () => {
+      if (!meterToDelete) return;
+  
+      try {
+        await deleteMeterReading(meterToDelete.id);
+        toast.success('Запис видалено');
+        fetchData();
+      } catch (error) {
+        console.error('Delete failed', error);
+        toast.error('Помилка видалення запису');
+      } finally {
+        setShowConfirm(false);
+        setMeterToDelete(null);
+      }
+    };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -192,6 +219,7 @@ export default function MetersPage() {
                 <th>Техніка</th>
                 <th>Обладнання</th>
                 <th>Мотогодини</th>
+                {user?.role === 'admin' && <th>Дії</th>}
               </tr>
             </thead>
             <tbody>
@@ -204,6 +232,13 @@ export default function MetersPage() {
                     <td>{location?.name}</td>
                     <td>{unit ? `${unit.equipmentType.name} S/n:${unit.serial}` : '—'}</td>
                     <td>{r.hours}</td>
+                    {user?.role === 'admin' && (
+                      <td>
+                        <Button size="sm" variant="danger" onClick={() => requestDelete(r)}>
+                          <Trash />
+                        </Button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
@@ -327,6 +362,15 @@ export default function MetersPage() {
           </Form>
         </Modal>
       </Container>
+      <ConfirmModal
+        show={showConfirm}
+        message={`Ви впевнені що хочете видалити значення ${meterToDelete?.hours} мотогодини для "${meterToDelete?.unit.name}"?`}
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setShowConfirm(false);
+          setMeterToDelete(null);
+        }}
+      />
     </div>
   );
 }

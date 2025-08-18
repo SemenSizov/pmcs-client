@@ -10,3 +10,5 @@ export const addMeterReading = (data: Omit<MeterReading, 'id' | 'location' | 'un
   api.post(METERS_ENDPOINT, data);
 
 export const getLastReading = async (unitId: string) => api.get(`${METERS_ENDPOINT}/last/${unitId}`);
+
+export const deleteMeterReading = (id: number) => api.delete(`${METERS_ENDPOINT}/${id}`);
