@@ -99,21 +99,21 @@ export default function MetersPage() {
     setShowConfirm(true);
   };
 
-    const confirmDelete = async () => {
-      if (!meterToDelete) return;
-  
-      try {
-        await deleteMeterReading(meterToDelete.id);
-        toast.success('Запис видалено');
-        fetchData();
-      } catch (error) {
-        console.error('Delete failed', error);
-        toast.error('Помилка видалення запису');
-      } finally {
-        setShowConfirm(false);
-        setMeterToDelete(null);
-      }
-    };
+  const confirmDelete = async () => {
+    if (!meterToDelete) return;
+
+    try {
+      await deleteMeterReading(meterToDelete.id);
+      toast.success('Запис видалено');
+      fetchData();
+    } catch (error) {
+      console.error('Delete failed', error);
+      toast.error('Помилка видалення запису');
+    } finally {
+      setShowConfirm(false);
+      setMeterToDelete(null);
+    }
+  };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -286,7 +286,19 @@ export default function MetersPage() {
           </div>
         )}
 
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal
+          show={showModal}
+          onHide={() => {
+            setFormData({
+              date: dayjs().format('YYYY-MM-DD'),
+              location_id: '',
+              unit_id: '',
+              hours: '',
+            });
+            setLastReading({ hours: 0, date: null });
+            setShowModal(false);
+          }}
+        >
           <Form onSubmit={handleSubmit}>
             <Modal.Header closeButton>
               <Modal.Title>Новий показник</Modal.Title>
@@ -352,7 +364,19 @@ export default function MetersPage() {
               </Form.Group>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowModal(false)}>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setFormData({
+                    date: dayjs().format('YYYY-MM-DD'),
+                    location_id: '',
+                    unit_id: '',
+                    hours: '',
+                  });
+                  setLastReading({ hours: 0, date: null });
+                  setShowModal(false);
+                }}
+              >
                 Скасувати
               </Button>
               <Button type="submit" variant="primary">

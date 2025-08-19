@@ -366,7 +366,22 @@ const LogEntriesPage = () => {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setModalLocation(undefined);
+                setModalUnit(undefined);
+                setNewEntry({
+                  date: dayjs().format('YYYY-MM-DD'),
+                  hours: null,
+                  procedureId: 0,
+                  unitId: 0,
+                  userId: 0,
+                });
+                setShowAddModal(false);
+                setFilters({ ...filters });
+              }}
+            >
               Скасувати
             </Button>
             <Button variant="primary" onClick={handleAdd}>
