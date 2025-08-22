@@ -9,9 +9,13 @@ import type { LogEntryDTO, LogEntryFilter, LogEntryCreate } from '../types/LogEn
 import type { EquipmentUnitDTO } from '../types/EquipmentUnit';
 import type { ProcedureDTO } from '../types/Procedure';
 import type { LocationDTO } from '../types/Location';
-import { addLogEntry, getLogEntries } from '../api/logEntries.api';
+import { addLogEntry, deleteLogEntry, getLogEntries } from '../api/logEntries.api';
+import { useAuth } from '../auth/AuthProvider';
+import { Trash } from 'react-bootstrap-icons';
+import ConfirmModal from '../components/ConfirmModal';
 
 const LogEntriesPage = () => {
+  const { user } = useAuth();
   const [entries, setEntries] = useState<LogEntryDTO[]>([]);
   const [total, setTotal] = useState(0);
   const [filters, setFilters] = useState<LogEntryFilter>({ page: 1, pageSize: 20 });
@@ -30,6 +34,8 @@ const LogEntriesPage = () => {
     unitId: 0,
     userId: 0,
   });
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<LogEntryDTO | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -80,6 +86,27 @@ const LogEntriesPage = () => {
       fetchData(); // Refresh entries after adding
     }
   };
+
+  const requestDelete = (entry: LogEntryDTO) => {
+    setEntryToDelete(entry);
+    setShowConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+      if (!entryToDelete) return;
+  
+      try {
+        await deleteLogEntry(entryToDelete.id);
+        toast.success('Запис видалено');
+        fetchData();
+      } catch (error) {
+        console.error('Delete failed', error);
+        toast.error('Помилка видалення запису');
+      } finally {
+        setShowConfirm(false);
+        setEntryToDelete(null);
+      }
+    };
 
   return (
     <div style={{ overflow: 'hidden' }}>
@@ -204,6 +231,7 @@ const LogEntriesPage = () => {
                     <th>Процедура</th>
                     <th>Дата</th>
                     <th>Мотогодини</th>
+                    {user?.role === 'admin' && <th>Дії</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -216,6 +244,13 @@ const LogEntriesPage = () => {
                       <td>{entry.procedure.name}</td>
                       <td>{dayjs(entry.date).format('YYYY-MM-DD')}</td>
                       <td>{entry.hours ?? '—'}</td>
+                      {user?.role === 'admin' && (
+                        <td>
+                          <Button size="sm" variant="danger" onClick={() => requestDelete(entry)}>
+                            <Trash />
+                          </Button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -390,6 +425,15 @@ const LogEntriesPage = () => {
           </Modal.Footer>
         </Modal>
       </Container>
+      <ConfirmModal
+        show={showConfirm}
+        message={`Ви впевнені що хочете видалити запис про ${entryToDelete?.procedure.name} за ${entryToDelete?.date}?`}
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setShowConfirm(false);
+          setEntryToDelete(null);
+        }}
+      />
     </div>
   );
 };

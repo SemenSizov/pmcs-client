@@ -9,3 +9,5 @@ export const getLogEntries = (filters: LogEntryFilter = {}) =>
 export const addLogEntry = (data: LogEntryCreate) => api.post(LOG_ENTRIES_ENDPOINT, data);
 
 export const getLastLogEntry = async (unitId: string) => api.get(`${LOG_ENTRIES_ENDPOINT}/last/${unitId}`);
+
+export const deleteLogEntry = async (id: number) => api.delete(`${LOG_ENTRIES_ENDPOINT}/${id}`);
