@@ -81,7 +81,11 @@ export default function MetersPage() {
 
   useEffect(() => {
     fetchData();
-    getLocations().then((res) => setLocations(res.data));
+    getLocations().then((res) => {
+      const locs = res.data;
+      locs.sort((a, b) => a.name.localeCompare(b.name))
+      setLocations(locs)
+    });
     getEquipmentUnits().then((res) => setUnits(res.data));
   }, []);
 
@@ -174,17 +178,17 @@ export default function MetersPage() {
                 <option value="">Все обладнання</option>
                 {filters.location_id
                   ? units
-                      .filter((u) => String(u.location.id) === filters.location_id)
-                      .map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.equipmentType.name} S/n:{u.serial}
-                        </option>
-                      ))
-                  : units.map((u) => (
+                    .filter((u) => String(u.location.id) === filters.location_id)
+                    .map((u) => (
                       <option key={u.id} value={u.id}>
                         {u.equipmentType.name} S/n:{u.serial}
                       </option>
-                    ))}
+                    ))
+                  : units.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.equipmentType.name} S/n:{u.serial}
+                    </option>
+                  ))}
               </Form.Select>
             </Form.Group>
           </Col>
