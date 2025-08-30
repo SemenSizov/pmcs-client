@@ -93,20 +93,20 @@ const LogEntriesPage = () => {
   };
 
   const confirmDelete = async () => {
-      if (!entryToDelete) return;
-  
-      try {
-        await deleteLogEntry(entryToDelete.id);
-        toast.success('Запис видалено');
-        fetchData();
-      } catch (error) {
-        console.error('Delete failed', error);
-        toast.error('Помилка видалення запису');
-      } finally {
-        setShowConfirm(false);
-        setEntryToDelete(null);
-      }
-    };
+    if (!entryToDelete) return;
+
+    try {
+      await deleteLogEntry(entryToDelete.id);
+      toast.success('Запис видалено');
+      fetchData();
+    } catch (error) {
+      console.error('Delete failed', error);
+      toast.error('Помилка видалення запису');
+    } finally {
+      setShowConfirm(false);
+      setEntryToDelete(null);
+    }
+  };
 
   return (
     <div style={{ overflow: 'hidden' }}>
@@ -147,17 +147,17 @@ const LogEntriesPage = () => {
                 <option value="">Все обладнання</option>
                 {filters.locationId
                   ? units
-                      .filter((u) => u.location.id == filters.locationId)
-                      .map((unit) => (
-                        <option key={unit.id} value={unit.id}>
-                          {unit.equipmentType.name} S/n:{unit.serial}
-                        </option>
-                      ))
-                  : units.map((unit) => (
+                    .filter((u) => u.location.id == filters.locationId)
+                    .map((unit) => (
                       <option key={unit.id} value={unit.id}>
                         {unit.equipmentType.name} S/n:{unit.serial}
                       </option>
-                    ))}
+                    ))
+                  : units.map((unit) => (
+                    <option key={unit.id} value={unit.id}>
+                      {unit.equipmentType.name} S/n:{unit.serial}
+                    </option>
+                  ))}
               </Form.Select>
             </Form.Group>
           </Col>
@@ -173,20 +173,20 @@ const LogEntriesPage = () => {
                 <option value="">Всі процедури</option>
                 {filters.unitId
                   ? procedures
-                      .filter((p) => {
-                        const u = units.find((u) => u.id == filters.unitId);
-                        return p.equipmentType.id === u?.equipmentType.id;
-                      })
-                      .map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))
-                  : procedures.map((p) => (
+                    .filter((p) => {
+                      const u = units.find((u) => u.id == filters.unitId);
+                      return p.equipmentType.id === u?.equipmentType.id;
+                    })
+                    .map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.name}
                       </option>
-                    ))}
+                    ))
+                  : procedures.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
               </Form.Select>
             </Form.Group>
           </Col>
@@ -341,7 +341,7 @@ const LogEntriesPage = () => {
                     setModalLocation(locations.find((l) => String(l.id) === e.target.value));
                   }}
                 >
-                  <option disabled>Виберіть техніку</option>
+                  <option>Виберіть техніку</option>
                   {locations.map((l) => (
                     <option key={l.id} value={l.id}>
                       {l.name}
