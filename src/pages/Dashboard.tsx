@@ -180,6 +180,7 @@ export default function DashboardPage() {
               }
               if (hasAlarm) {
                 loc.hasAlarm = true
+                loc.units = u
               }
             }
             if (loc.hasAlarm) {
