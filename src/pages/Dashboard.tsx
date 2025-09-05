@@ -182,6 +182,7 @@ export default function DashboardPage() {
     <>
       <style>{DASHBOARD_CSS}</style>
       <Container fluid className="py-3 px-2 px-sm-3">
+        <Row s={1} sm={1} md={2} xl={3} className="g-2 g-sm-3">test</Row>
         <Row xs={1} sm={1} md={2} xl={3} className="g-2 g-sm-3">
           {data.map((loc) => (
             <Col key={loc.id}>
@@ -221,7 +222,7 @@ export default function DashboardPage() {
                                 <span className="fw-semibold text-break fs-6">{u.serial}</span>
                               </div>
                               <small className="text-muted">{u.equipment_type}</small>
-                              <small className="text-muted">Мотогодини: {u.hours || '--'}</small>
+                              {u.hours && <small className="text-muted">Мотогодини: {u.hours}</small>}
                             </div>
                           </Accordion.Header>
                           <Accordion.Body className="py-2">
@@ -264,18 +265,17 @@ export default function DashboardPage() {
                                             <span className="text-muted me-1">Дата:</span>
                                             <strong>{fmtDate(e.last_log_date)}</strong>
                                           </div>
-                                          <div>
+                                          {e.last_log_hours && <div>
                                             <span className="text-muted me-1">Мотогодини:</span>
                                             <span className="fw-semibold">{valOrDash(e.last_log_hours)}</span>
-                                          </div>
+                                          </div>}
                                           {
-                                            //e.status !== 'ok' &&
-                                            e.last_meter_hours !== null && e.last_log_hours !== null && (
+                                            e.last_meter_hours !== null || e.last_log_hours !== null && (
                                               <div>
                                                 <span className="text-muted me-1">До наступної:</span>
                                                 {e.procedure_type === 'hours' ? (
                                                   <strong>
-                                                    {e.last_log_hours + e.procedure_hours - e.last_meter_hours} годин
+                                                    {e.last_log_hours + e.procedure_hours - e.last_meter_hours!} годин
                                                   </strong>
                                                 ) : (
                                                   <strong>{diffDaysFromToday(fmtDate(e.last_log_date))} днів</strong>
