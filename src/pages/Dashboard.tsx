@@ -34,6 +34,17 @@ export interface LocationGroup {
   units: UnitGroup[];
 }
 
+interface UnitSummary {
+  name: string;
+  procedures: string[]
+}
+
+interface LocationSummary {
+  name: string;
+  hasAlarm: boolean;
+  units: UnitSummary[]
+}
+
 async function getDashboard(): Promise<LocationGroup[]> {
   const res = await api.get<LocationGroup[]>('/dashboard'); // baseURL вже має /api
   return res.data;
@@ -141,6 +152,7 @@ export default function DashboardPage() {
   const [data, setData] = useState<LocationGroup[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState<LocationSummary[] | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -148,7 +160,34 @@ export default function DashboardPage() {
       try {
         setLoading(true);
         const payload = await getDashboard();
-        if (alive) setData(payload);
+        if (alive) {
+          setData(payload);
+          const sum: LocationSummary[] = [];
+          for (const locGroup of payload) {
+            const loc = {} as any
+            loc.name = locGroup.name;
+            loc.hasAlarm = false;
+            for (const unit of locGroup.units) {
+              const u = {} as any
+              let hasAlarm = false;
+              u.procedures = []
+              u.name = `${unit.equipment_type} - ${unit.serial}`
+              for (const entry of unit.entries) {
+                if (entry.status !== 'ok') {
+                  u.procedures.push(entry.procedure_name)
+                  hasAlarm = true
+                }
+              }
+              if (hasAlarm) {
+                loc.hasAlarm = true
+              }
+            }
+            if (loc.hasAlarm) {
+              sum.push(loc)
+            }
+          }
+          setSummary(sum)
+        }
       } catch (e) {
         const err = e as AxiosError<{ message?: string }>;
         if (alive) setError(err.response?.data?.message || err.message || 'Failed to load dashboard');
@@ -194,19 +233,20 @@ export default function DashboardPage() {
     <>
       <style>{DASHBOARD_CSS}</style>
       <Container fluid className="py-3 px-2 px-sm-3">
-        <Row s={1} sm={1} md={1} xl={1} className="g-2 g-sm-3">
-          <Col key='qwerty'>
-            <Accordion alwaysOpen flush>
-              <Accordion.Item eventKey="asdf">
-                <Accordion.Header>Роботи для проведення</Accordion.Header>
-                <Accordion.Body>
-                  <div className="fw-semibold entry-title">TEST</div>
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
+        {summary &&
+          <Row s={1} sm={1} md={1} xl={1} className="g-2 g-sm-3">
+            <Col key='qwerty'>
+              <Accordion alwaysOpen flush>
+                <Accordion.Item eventKey="asdf">
+                  <Accordion.Header><div className="fw-semibold entry-title">Роботи для проведення</div></Accordion.Header>
+                  <Accordion.Body>
+                    <div className="fw-semibold entry-title">${JSON.stringify(summary)}</div>
+                  </Accordion.Body>
+                </Accordion.Item>
+              </Accordion>
 
-          </Col>
-        </Row>
+            </Col>
+          </Row>}
         <Row xs={1} sm={1} md={2} xl={3} className="g-2 g-sm-3">
           {data.map((loc) => (
             <Col key={loc.id}>
