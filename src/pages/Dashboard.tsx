@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Spinner, Alert, Badge, Accordion, ListGroup } from 'react-bootstrap';
 import type { AxiosError } from 'axios';
-// ⚠️ Підкоригуй імпорт під свій axios-клієнт (baseURL має містити /api)
 import api from '../api/api';
 
 export type ProcedureType = 'period' | 'hours';
@@ -66,7 +65,20 @@ function fmtDate(s?: string | null) {
   return s.length >= 10 ? s.slice(0, 10) : s;
 }
 
-function diffDaysFromToday(ymd: string) {
+function diffDaysFromToday(ymd: string, procPeriod: ProcedurePeriod) {
+  let procPeriodDays = 7
+  if (procPeriod === 'monthly') {
+    procPeriodDays = 30
+  }
+  if (procPeriod === 'quarterly') {
+    procPeriodDays = 90
+  }
+  if (procPeriod === 'semiannual') {
+    procPeriodDays = 180
+  }
+  if (procPeriod === 'annual') {
+    procPeriodDays = 360
+  }
   const d = parseYMDtoUTC(ymd);
   if (!d) throw new Error('Invalid date format. Expected YYYY-MM-DD');
 
@@ -75,7 +87,7 @@ function diffDaysFromToday(ymd: string) {
   const inputUTC = d.getTime();
 
   const MS_PER_DAY = 24 * 60 * 60 * 1000;
-  return Math.round((inputUTC - todayUTC) / MS_PER_DAY);
+  return procPeriodDays - Math.round((todayUTC - inputUTC) / MS_PER_DAY);
 }
 
 function parseYMDtoUTC(ymd: string) {
@@ -290,7 +302,7 @@ export default function DashboardPage() {
                                                   {e.last_log_hours! + e.procedure_hours - e.last_meter_hours!} годин
                                                 </strong>
                                               ) : (
-                                                <strong>{diffDaysFromToday(fmtDate(e.last_log_date))} днів</strong>
+                                                <strong>{diffDaysFromToday(fmtDate(e.last_log_date), e.procedure_period)} днів</strong>
                                               )}
                                             </div>
                                             // )
