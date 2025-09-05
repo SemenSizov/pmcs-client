@@ -36,7 +36,8 @@ export interface LocationGroup {
 
 interface UnitSummary {
   name: string;
-  procedures: string[]
+  procedures: string[];
+  hasAlarm: boolean;
 }
 
 interface LocationSummary {
@@ -164,22 +165,24 @@ export default function DashboardPage() {
           setData(payload);
           const sum: LocationSummary[] = [];
           for (const locGroup of payload) {
-            const loc = {} as any
-            loc.name = locGroup.name;
-            loc.hasAlarm = false;
-            loc.units = []
+            const loc: LocationSummary = {
+              name: locGroup.name,
+              hasAlarm: false,
+              units: []
+            }
             for (const unit of locGroup.units) {
-              const u = {} as any
-              let hasAlarm = false;
-              u.procedures = []
-              u.name = `${unit.equipment_type} - ${unit.serial}`
+              const u: UnitSummary = {
+                hasAlarm: false,
+                name: `${unit.equipment_type} - ${unit.serial}`,
+                procedures: []
+              }
               for (const entry of unit.entries) {
                 if (entry.status !== 'ok') {
                   u.procedures.push(entry.procedure_name)
-                  hasAlarm = true
+                  u.hasAlarm = true
                 }
               }
-              if (hasAlarm) {
+              if (u.hasAlarm) {
                 loc.hasAlarm = true
                 loc.units.push(u)
               }
