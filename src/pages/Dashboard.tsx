@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Spinner, Alert, Badge, Accordion, ListGroup } from 'react-bootstrap';
+import { Container, Row, Col, Card, Spinner, Alert, Badge, Accordion, ListGroup, ListGroupItem } from 'react-bootstrap';
 import type { AxiosError } from 'axios';
 import api from '../api/api';
 
@@ -180,7 +180,7 @@ export default function DashboardPage() {
               }
               if (hasAlarm) {
                 loc.hasAlarm = true
-                loc.units = u
+                loc.units.push(u)
               }
             }
             if (loc.hasAlarm) {
@@ -241,7 +241,28 @@ export default function DashboardPage() {
                 <Accordion.Item eventKey="asdf">
                   <Accordion.Header><div className="fw-semibold entry-title">Роботи для проведення</div></Accordion.Header>
                   <Accordion.Body>
-                    <div className="fw-semibold entry-title">${JSON.stringify(summary)}</div>
+                    <div className="fw-semibold entry-title">
+                      <ListGroup>
+                        {summary.map(l =>
+                        (<ListGroupItem key={l.name}>
+                          {l.name}
+                          <ListGroup>
+                            {l.units.map(u => (
+                              <ListGroupItem key={u.name}>
+                                {u.name}
+                                <ListGroup>
+                                  {u.procedures.map(p => (
+                                    <ListGroupItem key={p}>
+                                      {p}
+                                    </ListGroupItem>))}
+                                </ListGroup>
+                              </ListGroupItem>
+                            ))}
+                          </ListGroup>
+                        </ListGroupItem>)
+                        )}
+                      </ListGroup>
+                    </div>
                   </Accordion.Body>
                 </Accordion.Item>
               </Accordion>
