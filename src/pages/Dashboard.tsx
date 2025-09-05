@@ -191,6 +191,7 @@ export default function DashboardPage() {
               <Card.Body>
                 <Accordion alwaysOpen flush>
                   <Accordion.Item eventKey="asdf">
+                    <Accordion.Header>Необхідні роботи</Accordion.Header>
                     <Accordion.Body>
                       <div className="fw-semibold entry-title">TEST</div>
                     </Accordion.Body>
@@ -287,12 +288,12 @@ export default function DashboardPage() {
                                             <span className="fw-semibold">{valOrDash(e.last_log_hours)}</span>
                                           </div>}
                                           {
-                                            e.last_meter_hours !== null || e.last_log_hours !== null && (
+                                            (e.last_meter_hours !== null || e.last_log_hours !== null) && (
                                               <div>
                                                 <span className="text-muted me-1">До наступної:</span>
                                                 {e.procedure_type === 'hours' ? (
                                                   <strong>
-                                                    {e.last_log_hours + e.procedure_hours - e.last_meter_hours!} годин
+                                                    {e.last_log_hours! + e.procedure_hours - e.last_meter_hours!} годин
                                                   </strong>
                                                 ) : (
                                                   <strong>{diffDaysFromToday(fmtDate(e.last_log_date))} днів</strong>
