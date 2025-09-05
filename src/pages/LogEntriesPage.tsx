@@ -65,7 +65,7 @@ const LogEntriesPage = () => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
   };
 
-  const handleAdd = async () => {
+  const handleSubmit = async () => {
     try {
       await addLogEntry(newEntry);
       toast.success('Запис додано');
@@ -327,11 +327,11 @@ const LogEntriesPage = () => {
             setFilters({ ...filters });
           }}
         >
-          <Modal.Header closeButton>
-            <Modal.Title>Новий запис</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form>
+          <Form onSubmit={handleSubmit}>
+            <Modal.Header closeButton>
+              <Modal.Title>Новий запис</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
               <Form.Group className="mb-2">
                 <Form.Label>Техніка</Form.Label>
                 <Form.Select
@@ -398,31 +398,31 @@ const LogEntriesPage = () => {
                   onChange={(e) => setNewEntry({ ...newEntry, hours: e.target.value ? Number(e.target.value) : null })}
                 />
               </Form.Group>
-            </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setModalLocation(undefined);
-                setModalUnit(undefined);
-                setNewEntry({
-                  date: dayjs().format('YYYY-MM-DD'),
-                  hours: null,
-                  procedureId: 0,
-                  unitId: 0,
-                  userId: 0,
-                });
-                setShowAddModal(false);
-                setFilters({ ...filters });
-              }}
-            >
-              Скасувати
-            </Button>
-            <Button variant="primary" onClick={handleAdd}>
-              Додати
-            </Button>
-          </Modal.Footer>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setModalLocation(undefined);
+                  setModalUnit(undefined);
+                  setNewEntry({
+                    date: dayjs().format('YYYY-MM-DD'),
+                    hours: null,
+                    procedureId: 0,
+                    unitId: 0,
+                    userId: 0,
+                  });
+                  setShowAddModal(false);
+                  setFilters({ ...filters });
+                }}
+              >
+                Скасувати
+              </Button>
+              <Button variant="primary" type="submit">
+                Додати
+              </Button>
+            </Modal.Footer>
+          </Form>
         </Modal>
       </Container>
       <ConfirmModal
@@ -434,7 +434,7 @@ const LogEntriesPage = () => {
           setEntryToDelete(null);
         }}
       />
-    </div>
+    </div >
   );
 };
 
