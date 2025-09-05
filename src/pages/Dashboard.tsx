@@ -167,6 +167,7 @@ export default function DashboardPage() {
             const loc = {} as any
             loc.name = locGroup.name;
             loc.hasAlarm = false;
+            loc.units = []
             for (const unit of locGroup.units) {
               const u = {} as any
               let hasAlarm = false;
