@@ -182,7 +182,24 @@ export default function DashboardPage() {
     <>
       <style>{DASHBOARD_CSS}</style>
       <Container fluid className="py-3 px-2 px-sm-3">
-        <Row s={1} sm={1} md={2} xl={3} className="g-2 g-sm-3">test</Row>
+        <Row s={1} sm={1} md={1} xl={1} className="g-2 g-sm-3">
+          <Col key='qwerty'>
+            <Card className="h-100 shadow-sm">
+              <Card.Header className="d-flex justify-content-between align-items-center py-2">
+                <strong className="text-break">Необхідні роботи</strong>
+              </Card.Header>
+              <Card.Body>
+                <Accordion alwaysOpen flush>
+                  <Accordion.Item eventKey="asdf">
+                    <Accordion.Body>
+                      <div className="fw-semibold entry-title">TEST</div>
+                    </Accordion.Body>
+                  </Accordion.Item>
+                </Accordion>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
         <Row xs={1} sm={1} md={2} xl={3} className="g-2 g-sm-3">
           {data.map((loc) => (
             <Col key={loc.id}>
