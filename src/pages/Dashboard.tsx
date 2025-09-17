@@ -302,9 +302,7 @@ export default function DashboardPage() {
               <Card className="h-100 shadow-sm">
                 <Card.Header className="d-flex justify-content-between align-items-center py-2">
                   <strong className="text-break">{loc.name}</strong>
-                  <Badge bg="primary" pill title="Статус юнітів">
-                    <ColoredDot status={loc.status} />
-                  </Badge>
+                  <ColoredDot status={loc.status} />
                 </Card.Header>
 
                 <Card.Body className="py-2">

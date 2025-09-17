@@ -16,6 +16,7 @@ const STATUS_DOT_STYLE: React.CSSProperties = {
     width: '.6rem',
     height: '.6rem',
     borderRadius: 9999,
+    margin: '.6rem'
 };
 
 interface ColoredDotProps {
