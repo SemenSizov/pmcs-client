@@ -207,8 +207,8 @@ export default function DashboardPage() {
               // console.log(unit);
               const entries: DashboardEntryProc[] = unit.entries.map(de => getEntryProc(de));
               uGroup.push(getUnitGroupProc(unit, entries))
-              console.log(uGroup)
             }
+            console.log(uGroup)
             locationsData.push(getLocationGroupProc(locGroup, uGroup))
             console.log(locationsData)
           }
