@@ -204,7 +204,6 @@ export default function DashboardPage() {
           for (const locGroup of payload) {
             const uGroup: UnitGroupProc[] = []
             for (const unit of locGroup.units) {
-              // console.log(unit);
               const entries: DashboardEntryProc[] = unit.entries.map(de => getEntryProc(de));
               uGroup.push(getUnitGroupProc(unit, entries))
             }
@@ -214,7 +213,7 @@ export default function DashboardPage() {
             console.log(locationsData)
           }
           setData(locationsData);
-          setSummary(locationsData)
+          setSummary([...filterFailedEntries(locationsData)])
         }
       } catch (e) {
         const err = e as AxiosError<{ message?: string }>;
