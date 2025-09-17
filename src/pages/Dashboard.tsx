@@ -163,6 +163,7 @@ function parseYMDtoUTC(ymd: string) {
 
 
 function filterFailedEntries(data: LocationGroupProc[]): LocationGroupProc[] {
+  console.log(data)
   const result = data.filter(l => l.hasAlarm)
   for (const loc of result) {
     loc.unitsProc = loc.unitsProc.filter(u => u.hasAlarm)
