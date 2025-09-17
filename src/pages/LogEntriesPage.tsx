@@ -58,7 +58,11 @@ const LogEntriesPage = () => {
   useEffect(() => {
     getEquipmentUnits().then((res) => setUnits(res.data));
     getProcedures().then((res) => setProcedures(res.data));
-    getLocations().then((res) => setLocations(res.data));
+    getLocations().then((res) => {
+      const data = res.data;
+      data.sort((a, b) => a.name.localeCompare(b.name))
+      setLocations(data)
+    });
   }, []);
 
   const handleFilterChange = (key: keyof LogEntryFilter, value: any) => {

@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Spinner, Alert, Badge, Accordion, ListGroup, ListGroupItem } from 'react-bootstrap';
 import type { AxiosError } from 'axios';
 import api from '../api/api';
+import ColoredDot from '../components/ColoredDot';
 
 export type ProcedureType = 'period' | 'hours';
 export type ProcedurePeriod = 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'annual';
+type status = 'ok' | 'warning' | 'error'
 
 export interface DashboardEntry {
   location_id: number;
@@ -18,7 +20,7 @@ export interface DashboardEntry {
   last_log_date: string; // 'YYYY-MM-DD'
   last_log_hours: number | null;
   last_meter_hours: number | null;
-  status?: 'ok' | 'warning' | 'error';
+  status?: status;
 }
 
 export interface UnitGroup {
@@ -34,17 +36,60 @@ export interface LocationGroup {
   units: UnitGroup[];
 }
 
-interface UnitSummary {
+interface DashboardEntryProc extends DashboardEntry {
+  intervalToNext: number;
+  intervalToNextStr: string;
+}
+
+interface UnitGroupProc extends UnitGroup {
   name: string;
   procedures: string[];
   hasAlarm: boolean;
+  status: status;
+  entriesProc: DashboardEntryProc[]
 }
 
-interface LocationSummary {
+interface LocationGroupProc extends LocationGroup {
   name: string;
   hasAlarm: boolean;
-  units: UnitSummary[]
+  status: status;
+  unitsProc: UnitGroupProc[]
 }
+
+function getEntryProc(de: DashboardEntry): DashboardEntryProc {
+  const interval = de.procedure_type === 'hours' ? de.last_log_hours! + de.procedure_hours - de.last_meter_hours! :
+    diffDaysFromToday(fmtDate(de.last_log_date), de.procedure_period)
+  return {
+    ...de,
+    intervalToNext: interval,
+    intervalToNextStr: de.procedure_type === 'hours' ? `${interval}  годин` : `${interval} днів`
+  }
+}
+
+function getUnitGroupProc(ug: UnitGroup, entries: DashboardEntryProc[]): UnitGroupProc {
+  const procStatuses = entries.map(e => e.status)
+  const stat: status = procStatuses.some(ps => ps === 'error') ? 'error' : (procStatuses.some(ps => ps === 'warning') ? 'warning' : 'ok')
+  return {
+    ...ug,
+    name: `${ug.equipment_type} - ${ug.serial}`,
+    hasAlarm: stat !== 'ok',
+    status: stat,
+    procedures: entries.map(e => e.procedure_name),
+    entriesProc: entries
+  }
+}
+
+function getLocationGroupProc(lg: LocationGroup, uGroups: UnitGroupProc[]): LocationGroupProc {
+  const ugStatuses = uGroups.map(ug => ug.status)
+  const stat: status = ugStatuses.some(us => us === 'error') ? 'error' : (ugStatuses.some(us => us === 'warning') ? 'warning' : 'ok')
+  return {
+    ...lg,
+    status: stat,
+    hasAlarm: stat !== 'ok',
+    unitsProc: uGroups
+  }
+}
+
 
 async function getDashboard(): Promise<LocationGroup[]> {
   const res = await api.get<LocationGroup[]>('/dashboard'); // baseURL вже має /api
@@ -116,25 +161,17 @@ function parseYMDtoUTC(ymd: string) {
   return dt;
 }
 
-function statusMeta(status?: 'ok' | 'warning' | 'error') {
-  switch (status) {
-    case 'ok':
-      return { label: 'OK', variant: 'success' as const, bgClass: 'bg-success' };
-    case 'warning':
-      return { label: 'Увага', variant: 'warning' as const, bgClass: 'bg-warning' };
-    case 'error':
-      return { label: 'Увага', variant: 'danger' as const, bgClass: 'bg-danger' };
-    default:
-      return { label: 'Н/д', variant: 'secondary' as const, bgClass: 'bg-secondary' };
-  }
-}
 
-const STATUS_DOT_STYLE: React.CSSProperties = {
-  display: 'inline-block',
-  width: '.6rem',
-  height: '.6rem',
-  borderRadius: 9999,
-};
+function filterFailedEntries(data: LocationGroupProc[]): LocationGroupProc[] {
+  const result = data.filter(l => l.hasAlarm)
+  for (const loc of result) {
+    loc.unitsProc = loc.unitsProc.filter(u => u.hasAlarm)
+    for (const unit of loc.unitsProc) {
+      unit.entriesProc = unit.entriesProc.filter(e => e.status !== 'ok')
+    }
+  }
+  return result
+}
 
 // CSS-in-JS для кращого десктоп-лейаута без окремого файла
 const DASHBOARD_CSS = `
@@ -150,10 +187,10 @@ const DASHBOARD_CSS = `
 `;
 
 export default function DashboardPage() {
-  const [data, setData] = useState<LocationGroup[] | null>(null);
+  const [data, setData] = useState<LocationGroupProc[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [summary, setSummary] = useState<LocationSummary[] | null>(null);
+  const [summary, setSummary] = useState<LocationGroupProc[] | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -162,36 +199,18 @@ export default function DashboardPage() {
         setLoading(true);
         const payload = await getDashboard();
         if (alive) {
-          setData(payload);
-          const sum: LocationSummary[] = [];
+          const locationsData: LocationGroupProc[] = []
           for (const locGroup of payload) {
-            const loc: LocationSummary = {
-              name: locGroup.name,
-              hasAlarm: false,
-              units: []
+            const uGroup: UnitGroupProc[] = []
+            for (let unit of locGroup.units) {
+              const entries: DashboardEntryProc[] = unit.entries.map(de => getEntryProc(de));
+              uGroup.push(getUnitGroupProc(unit, entries))
             }
-            for (const unit of locGroup.units) {
-              const u: UnitSummary = {
-                hasAlarm: false,
-                name: `${unit.equipment_type} - ${unit.serial}`,
-                procedures: []
-              }
-              for (const entry of unit.entries) {
-                if (entry.status !== 'ok') {
-                  u.procedures.push(entry.procedure_name)
-                  u.hasAlarm = true
-                }
-              }
-              if (u.hasAlarm) {
-                loc.hasAlarm = true
-                loc.units.push(u)
-              }
-            }
-            if (loc.hasAlarm) {
-              sum.push(loc)
-            }
+            locationsData.push(getLocationGroupProc(locGroup, uGroup))
           }
-          setSummary(sum)
+          setData(locationsData);
+
+          setSummary(filterFailedEntries(data!))
         }
       } catch (e) {
         const err = e as AxiosError<{ message?: string }>;
@@ -247,24 +266,28 @@ export default function DashboardPage() {
                   <Accordion.Body>
                     <div className="fw-semibold entry-title">
                       <ListGroup>
-                        {summary.map(l =>
-                        (<ListGroupItem key={l.name}>
-                          {l.name}
-                          <ListGroup>
-                            {l.units.map(u => (
-                              <ListGroupItem key={u.name}>
-                                {u.name}
-                                <ListGroup>
-                                  {u.procedures.map(p => (
-                                    <ListGroupItem key={p}>
-                                      {p}
-                                    </ListGroupItem>))}
-                                </ListGroup>
-                              </ListGroupItem>
-                            ))}
-                          </ListGroup>
-                        </ListGroupItem>)
-                        )}
+                        {summary.map(l => {
+                          return (<ListGroupItem key={l.name}>
+                            <ColoredDot status={l.status} />
+                            {l.name}
+                            <ListGroup>
+                              {l.unitsProc.map(u =>
+                                <ListGroupItem key={u.name}>
+                                  <ColoredDot status={u.status} />
+                                  {u.name}
+                                  <ListGroup>
+                                    {u.entriesProc.map(p =>
+                                      <ListGroupItem key={p.procedure_name}>
+                                        <ColoredDot status={p.status!} />
+                                        {p.procedure_name} : {p.intervalToNextStr}
+                                      </ListGroupItem>)
+                                    }
+                                  </ListGroup>
+                                </ListGroupItem>
+                              )}
+                            </ListGroup>
+                          </ListGroupItem>)
+                        })}
                       </ListGroup>
                     </div>
                   </Accordion.Body>
@@ -279,8 +302,8 @@ export default function DashboardPage() {
               <Card className="h-100 shadow-sm">
                 <Card.Header className="d-flex justify-content-between align-items-center py-2">
                   <strong className="text-break">{loc.name}</strong>
-                  <Badge bg="primary" pill title="Кількість юнітів">
-                    {loc.units.length}
+                  <Badge bg="primary" pill title="Статус юнітів">
+                    {loc.status}
                   </Badge>
                 </Card.Header>
 
@@ -289,26 +312,12 @@ export default function DashboardPage() {
                     <div className="text-muted small">Обладнання відсутнє</div>
                   ) : (
                     <Accordion alwaysOpen flush>
-                      {loc.units.map((u, idx) => (
+                      {loc.unitsProc.map((u, idx) => (
                         <Accordion.Item eventKey={String(idx)} key={`${loc.id}:${u.serial}`}>
                           <Accordion.Header>
                             <div className="d-flex flex-column">
                               <div className="d-flex align-items-center gap-2">
-                                {u.entries.some((e) => e.status !== 'ok') ? (
-                                  <span
-                                    className="bg-warning"
-                                    style={STATUS_DOT_STYLE}
-                                    title="Увага"
-                                    aria-label="Увага"
-                                  />
-                                ) : (
-                                  <span
-                                    className="bg-success"
-                                    style={STATUS_DOT_STYLE}
-                                    title="OK"
-                                    aria-label="OK"
-                                  />
-                                )}
+                                <ColoredDot status={loc.status} />
                                 <span className="fw-semibold text-break fs-6">{u.serial}</span>
                               </div>
                               <small className="text-muted">{u.equipment_type}</small>
@@ -320,64 +329,47 @@ export default function DashboardPage() {
                               <div className="text-muted small">Немає записів</div>
                             ) : (
                               <ListGroup variant="flush">
-                                {u.entries.map((e, i) => {
-                                  const sm = statusMeta(e.status);
-                                  return (
-                                    <ListGroup.Item key={`${e.procedure_name}:${i}`} className="py-2">
-                                      <div className="entry-row">
-                                        {/* Ліва частина */}
-                                        <div className="entry-left">
-                                          <div className="d-flex align-items-center gap-2">
-                                            <span
-                                              className={sm.bgClass}
-                                              style={STATUS_DOT_STYLE}
-                                              title={sm.label}
-                                              aria-label={sm.label}
-                                            />
-                                            <div className="fw-semibold entry-title">{e.procedure_name}</div>
-                                            {/* Текстовий бейдж — схований на xs, видимий від sm */}
-                                            <span className={`badge bg-${sm.variant} d-none d-sm-inline`}>
-                                              {sm.label}
-                                            </span>
-                                          </div>
-                                          <small className="text-muted">
-                                            {e.procedure_type === 'hours' ? (
-                                              <>Періодичність: кожні {e.procedure_hours} мотогод.</>
-                                            ) : (
-                                              <>Періодичність: {periodLabel(e.procedure_period)}</>
-                                            )}
-                                          </small>
+                                {u.entriesProc.map((e, i) =>
+                                  <ListGroup.Item key={`${e.procedure_name}:${i}`} className="py-2">
+                                    <div className="entry-row">
+                                      {/* Ліва частина */}
+                                      <div className="entry-left">
+                                        <div className="d-flex align-items-center gap-2">
+                                          <ColoredDot status={e.status!} />
+                                          <div className="fw-semibold entry-title">{e.procedure_name}</div>
                                         </div>
-
-                                        {/* Права частина */}
-                                        <div className="entry-right d-grid small">
-                                          <div>
-                                            <span className="text-muted me-1">Дата:</span>
-                                            <strong>{fmtDate(e.last_log_date)}</strong>
-                                          </div>
-                                          {e.last_log_hours && <div>
-                                            <span className="text-muted me-1">Мотогодини:</span>
-                                            <span className="fw-semibold">{valOrDash(e.last_log_hours)}</span>
-                                          </div>}
-                                          {
-                                            // (e.last_meter_hours !== null || e.last_log_hours !== null) && (
-                                            <div>
-                                              <span className="text-muted me-1">До наступної:</span>
-                                              {e.procedure_type === 'hours' ? (
-                                                <strong>
-                                                  {e.last_log_hours! + e.procedure_hours - e.last_meter_hours!} годин
-                                                </strong>
-                                              ) : (
-                                                <strong>{diffDaysFromToday(fmtDate(e.last_log_date), e.procedure_period)} днів</strong>
-                                              )}
-                                            </div>
-                                            // )
-                                          }
-                                        </div>
+                                        <small className="text-muted">
+                                          {e.procedure_type === 'hours' ? (
+                                            <>Періодичність: кожні {e.procedure_hours} мотогод.</>
+                                          ) : (
+                                            <>Періодичність: {periodLabel(e.procedure_period)}</>
+                                          )}
+                                        </small>
                                       </div>
-                                    </ListGroup.Item>
-                                  );
-                                })}
+
+                                      {/* Права частина */}
+                                      <div className="entry-right d-grid small">
+                                        <div>
+                                          <span className="text-muted me-1">Дата:</span>
+                                          <strong>{fmtDate(e.last_log_date)}</strong>
+                                        </div>
+                                        {e.last_log_hours && <div>
+                                          <span className="text-muted me-1">Мотогодини:</span>
+                                          <span className="fw-semibold">{valOrDash(e.last_log_hours)}</span>
+                                        </div>}
+                                        {
+                                          // (e.last_meter_hours !== null || e.last_log_hours !== null) && (
+                                          <div>
+                                            <span className="text-muted me-1">До наступної:</span>
+                                            {e.intervalToNextStr}
+                                          </div>
+                                          // )
+                                        }
+                                      </div>
+                                    </div>
+                                  </ListGroup.Item>
+                                )
+                                }
                               </ListGroup>
                             )}
                           </Accordion.Body>
