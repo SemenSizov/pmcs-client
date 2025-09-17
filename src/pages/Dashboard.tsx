@@ -204,8 +204,10 @@ export default function DashboardPage() {
           for (const locGroup of payload) {
             const uGroup: UnitGroupProc[] = []
             for (const unit of locGroup.units) {
+              console.log(unit);
               const entries: DashboardEntryProc[] = unit.entries.map(de => getEntryProc(de));
               uGroup.push(getUnitGroupProc(unit, entries))
+              console.log(uGroup)
             }
             locationsData.push(getLocationGroupProc(locGroup, uGroup))
           }
