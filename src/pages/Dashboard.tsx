@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Spinner, Alert, Badge, Accordion, ListGroup, ListGroupItem } from 'react-bootstrap';
+import { Container, Row, Col, Card, Spinner, Alert, Accordion, ListGroup, ListGroupItem } from 'react-bootstrap';
 import type { AxiosError } from 'axios';
 import api from '../api/api';
 import ColoredDot from '../components/ColoredDot';
@@ -203,7 +203,7 @@ export default function DashboardPage() {
           const locationsData: LocationGroupProc[] = []
           for (const locGroup of payload) {
             const uGroup: UnitGroupProc[] = []
-            for (let unit of locGroup.units) {
+            for (const unit of locGroup.units) {
               const entries: DashboardEntryProc[] = unit.entries.map(de => getEntryProc(de));
               uGroup.push(getUnitGroupProc(unit, entries))
             }
