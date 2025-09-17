@@ -163,16 +163,19 @@ function parseYMDtoUTC(ymd: string) {
 
 
 function filterFailedEntries(data: LocationGroupProc[]): LocationGroupProc[] {
-  console.log(data)
-  const result = data.filter(l => l.hasAlarm)
-  for (const loc of result) {
-    loc.unitsProc = loc.unitsProc.filter(u => u.hasAlarm)
-    for (const unit of loc.unitsProc) {
-      unit.entriesProc = unit.entriesProc.filter(e => e.status !== 'ok')
-    }
-  }
-  return result
+  return data
+    .filter(l => l.hasAlarm)
+    .map(l => ({
+      ...l,
+      unitsProc: l.unitsProc
+        .filter(u => u.hasAlarm)
+        .map(u => ({
+          ...u,
+          entriesProc: u.entriesProc.filter(e => e.status !== 'ok')
+        }))
+    }));
 }
+
 
 // CSS-in-JS для кращого десктоп-лейаута без окремого файла
 const DASHBOARD_CSS = `
