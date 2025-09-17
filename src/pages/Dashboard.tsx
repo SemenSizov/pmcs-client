@@ -202,21 +202,18 @@ export default function DashboardPage() {
       try {
         setLoading(true);
         const payload = await getDashboard();
-        if (alive) {
-          const locationsData: LocationGroupProc[] = []
-          for (const locGroup of payload) {
-            const uGroup: UnitGroupProc[] = []
-            for (const unit of locGroup.units) {
-              const entries: DashboardEntryProc[] = unit.entries.map(de => getEntryProc(de));
-              uGroup.push(getUnitGroupProc(unit, entries))
-            }
-            console.log(uGroup)
-            locationsData.push(getLocationGroupProc(locGroup, uGroup))
-            console.log(locationsData)
-          }
-          setData(locationsData);
-          setSummary([...filterFailedEntries(locationsData)])
-        }
+        if (alive) return;
+        const locationsData: LocationGroupProc[] = payload.map(locGroup => {
+          const uGroup: UnitGroupProc[] = locGroup.units.map(unit => {
+            const entries: DashboardEntryProc[] = unit.entries.map(getEntryProc);
+            return getUnitGroupProc(unit, entries);
+          });
+          return getLocationGroupProc(locGroup, uGroup);
+        });
+
+        setData(locationsData);
+        setSummary(filterFailedEntries(locationsData))
+
       } catch (e) {
         const err = e as AxiosError<{ message?: string }>;
         if (alive) setError(err.response?.data?.message || err.message || 'Failed to load dashboard');
@@ -320,7 +317,7 @@ export default function DashboardPage() {
                           <Accordion.Header>
                             <div className="d-flex flex-column">
                               <div className="d-flex align-items-center gap-2">
-                                <ColoredDot status={loc.status} />
+                                <ColoredDot status={u.status} />
                                 <span className="fw-semibold text-break fs-6">{u.serial}</span>
                               </div>
                               <small className="text-muted">{u.equipment_type}</small>
