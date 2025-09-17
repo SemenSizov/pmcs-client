@@ -210,8 +210,7 @@ export default function DashboardPage() {
             locationsData.push(getLocationGroupProc(locGroup, uGroup))
           }
           setData(locationsData);
-
-          setSummary(filterFailedEntries(data!))
+          setSummary(filterFailedEntries(locationsData))
         }
       } catch (e) {
         const err = e as AxiosError<{ message?: string }>;
@@ -304,7 +303,7 @@ export default function DashboardPage() {
                 <Card.Header className="d-flex justify-content-between align-items-center py-2">
                   <strong className="text-break">{loc.name}</strong>
                   <Badge bg="primary" pill title="Статус юнітів">
-                    {loc.status}
+                    <ColoredDot status={loc.status} />
                   </Badge>
                 </Card.Header>
 
