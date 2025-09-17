@@ -213,7 +213,7 @@ export default function DashboardPage() {
             console.log(locationsData)
           }
           setData(locationsData);
-          setSummary(filterFailedEntries(locationsData))
+          setSummary(locationsData)
         }
       } catch (e) {
         const err = e as AxiosError<{ message?: string }>;
