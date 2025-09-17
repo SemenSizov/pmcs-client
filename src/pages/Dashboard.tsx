@@ -210,6 +210,7 @@ export default function DashboardPage() {
             }
             console.log(uGroup)
             locationsData.push(getLocationGroupProc(locGroup, uGroup))
+            filterFailedEntries(locationsData)
             console.log(locationsData)
           }
           setData(locationsData);
