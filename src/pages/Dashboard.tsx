@@ -210,7 +210,7 @@ export default function DashboardPage() {
           });
           return getLocationGroupProc(locGroup, uGroup);
         });
-
+        console.log(locationsData);
         setData(locationsData);
         setSummary(filterFailedEntries(locationsData))
 
