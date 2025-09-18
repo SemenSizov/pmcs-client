@@ -202,7 +202,7 @@ export default function DashboardPage() {
       try {
         setLoading(true);
         const payload = await getDashboard();
-        if (alive) return;
+        if (!alive) return;
         const locationsData: LocationGroupProc[] = payload.map(locGroup => {
           const uGroup: UnitGroupProc[] = locGroup.units.map(unit => {
             const entries: DashboardEntryProc[] = unit.entries.map(getEntryProc);
@@ -210,7 +210,6 @@ export default function DashboardPage() {
           });
           return getLocationGroupProc(locGroup, uGroup);
         });
-        console.log(locationsData);
         setData(locationsData);
         setSummary(filterFailedEntries(locationsData))
 
