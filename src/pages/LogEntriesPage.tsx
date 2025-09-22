@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Table, Spinner, Row, Col, Form, Button, Pagination, Modal, Container } from 'react-bootstrap';
 import dayjs from 'dayjs';
 import { toast, ToastContainer } from 'react-toastify';
@@ -16,6 +16,9 @@ import ConfirmModal from '../components/ConfirmModal';
 
 const LogEntriesPage = () => {
   const { user } = useAuth();
+
+  const addBtnRef = useRef<HTMLButtonElement>(null);
+
   const [entries, setEntries] = useState<LogEntryDTO[]>([]);
   const [total, setTotal] = useState(0);
   const [filters, setFilters] = useState<LogEntryFilter>({ page: 1, pageSize: 20 });
@@ -40,7 +43,6 @@ const LogEntriesPage = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      console.log(filters);
       const { data } = await getLogEntries(filters);
       setEntries(data.items);
       setTotal(data.total);
@@ -53,6 +55,7 @@ const LogEntriesPage = () => {
 
   useEffect(() => {
     fetchData();
+    addBtnRef.current?.focus()
   }, [filters]);
 
   useEffect(() => {
@@ -63,6 +66,7 @@ const LogEntriesPage = () => {
       data.sort((a, b) => a.name.localeCompare(b.name))
       setLocations(data)
     });
+    addBtnRef.current?.focus();
   }, []);
 
   const handleFilterChange = (key: keyof LogEntryFilter, value: any) => {
@@ -88,6 +92,7 @@ const LogEntriesPage = () => {
       setShowAddModal(false);
       setFilters({ ...filters });
       fetchData(); // Refresh entries after adding
+      addBtnRef.current?.focus();
     }
   };
 
@@ -109,6 +114,7 @@ const LogEntriesPage = () => {
     } finally {
       setShowConfirm(false);
       setEntryToDelete(null);
+      addBtnRef.current?.focus();
     }
   };
 
@@ -118,7 +124,7 @@ const LogEntriesPage = () => {
         <ToastContainer />
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h4>Журнал обслуговування</h4>
-          <Button onClick={() => setShowAddModal(true)} className="mb-3">
+          <Button ref={addBtnRef} onClick={() => setShowAddModal(true)} className="mb-3">
             Додати запис
           </Button>
         </div>

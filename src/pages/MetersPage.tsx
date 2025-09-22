@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Modal, Form, Table, Spinner, Row, Col, Pagination, Container } from 'react-bootstrap';
 import dayjs from 'dayjs';
 import { getMeterReadings, addMeterReading, getLastReading, deleteMeterReading } from '../api/meterReadings.api';
@@ -14,6 +14,9 @@ import ConfirmModal from '../components/ConfirmModal';
 
 export default function MetersPage() {
   const { user } = useAuth();
+
+  const addBtnRef = useRef<HTMLButtonElement>(null);
+
   const [readings, setReadings] = useState<MeterReading[]>([]);
   const [locations, setLocations] = useState<LocationDTO[]>([]);
   const [units, setUnits] = useState<EquipmentUnitDTO[]>([]);
@@ -56,6 +59,7 @@ export default function MetersPage() {
     if (formData.unit_id) {
       fetchLastReading(formData.unit_id);
     }
+    addBtnRef.current?.focus();
   }, [formData.unit_id]);
 
   const fetchData = async () => {
@@ -87,10 +91,12 @@ export default function MetersPage() {
       setLocations(locs)
     });
     getEquipmentUnits().then((res) => setUnits(res.data));
+    addBtnRef.current?.focus();
   }, []);
 
   useEffect(() => {
     fetchData();
+    addBtnRef.current?.focus();
   }, [filters]);
 
   const handleFilterChange = (e: any) => {
@@ -116,6 +122,7 @@ export default function MetersPage() {
     } finally {
       setShowConfirm(false);
       setMeterToDelete(null);
+      addBtnRef.current?.focus();
     }
   };
 
@@ -145,6 +152,7 @@ export default function MetersPage() {
         hours: '',
       });
       setLastReading({ hours: 0, date: null });
+      addBtnRef.current?.focus();
     }
   };
 
@@ -154,7 +162,7 @@ export default function MetersPage() {
         <ToastContainer />
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h4>Показники мотогодин</h4>
-          <Button onClick={() => setShowModal(true)}>Додати</Button>
+          <Button ref={addBtnRef} onClick={() => setShowModal(true)}>Додати</Button>
         </div>
 
         <Row className="mb-3">
