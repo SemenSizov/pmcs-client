@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { logout } from '../auth/auth';
+import { triggerLogout } from './authService';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -27,13 +27,12 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
     if (error.response?.status === 401) {
-      logout();
+      triggerLogout();
       toast.error('Сесія завершена. Увійдіть знову.');
       window.location.href = '/';
     }
     if (error.response?.status === 403) {
-      logout()
-      toast.error('Помилка авторизації. Увійдіть знову.');
+      toast.error('У вас немає доступу до цього ресурсу.');
       window.location.href = '/';
     }
   }

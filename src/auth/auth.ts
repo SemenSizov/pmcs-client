@@ -1,5 +1,8 @@
-export const logout = () => {
-  localStorage.removeItem('token');
+import { removeAuthTokenFromApi } from "../api/api";
+
+export const clearToken = () => {
+  sessionStorage.removeItem('token');
+  removeAuthTokenFromApi();
 };
 
 export const redirectToGoogle = () => {

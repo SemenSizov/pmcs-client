@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useState, type ReactNode, type FC } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import type { UserPayload } from '../types/User';
-import { logout as performLogout } from './auth';
 import React from 'react';
 import { addAuthTokenToApi, removeAuthTokenFromApi } from '../api/api';
+import { clearToken } from './auth';
+import { setLogout } from '../api/authService';
 
 export interface AuthContextType {
   token: string | null;
@@ -24,7 +25,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<UserPayload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   useEffect(() => {
     const storedToken = sessionStorage.getItem('token');
     if (storedToken) {
@@ -33,19 +34,16 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         setToken(storedToken);
         setUser(decoded);
         addAuthTokenToApi(storedToken)
-        setIsLoading(false);
       } catch (error) {
         console.error('Token decoding error:', error);
-        performLogout();
+        clearToken();
         setToken(null);
         removeAuthTokenFromApi()
         setUser(null);
         setIsLoading(false);
       }
-    } else {
-      console.warn('No token in localStorage');
-      setIsLoading(false);
     }
+    setIsLoading(false);
   }, []);
 
   const login = (token: string) => {
@@ -57,11 +55,15 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
-    performLogout();
+    clearToken();
     setToken(null);
     setUser(null);
     window.location.href = '/';
   };
+
+  useEffect(() => {
+    setLogout(logout);
+  })
 
   return React.createElement(
     AuthContext.Provider,
