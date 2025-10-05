@@ -317,9 +317,9 @@ export default function DashboardPage() {
                             <div className="d-flex flex-column">
                               <div className="d-flex align-items-center gap-2">
                                 <ColoredDot status={u.status} />
-                                <span className="fw-semibold text-break fs-6">{u.serial}</span>
+                                <span className="fw-semibold text-break fs-6">{u.equipment_type}</span>
                               </div>
-                              <small className="text-muted">{u.equipment_type}</small>
+                              <small className="text-muted">{u.serial}</small>
                               {u.hours && <small className="text-muted">Мотогодини: {u.hours}</small>}
                             </div>
                           </Accordion.Header>
