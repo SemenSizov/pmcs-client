@@ -27,14 +27,19 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
     if (error.response?.status === 401) {
-      triggerLogout();
-      toast.error('Сесія завершена. Увійдіть знову.');
-      window.location.href = '/';
+      if (window.location.pathname !== '/') {
+        toast.error('Сесія завершена. Увійдіть знову.')
+        triggerLogout();
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1500)
+      }
     }
     if (error.response?.status === 403) {
       toast.error('У вас немає доступу до цього ресурсу.');
       window.location.href = '/';
     }
+    return Promise.reject(error);
   }
 );
 

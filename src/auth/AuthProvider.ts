@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode, type FC } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode, type FC, useCallback } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import type { UserPayload } from '../types/User';
 import React from 'react';
@@ -30,7 +30,13 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     const storedToken = sessionStorage.getItem('token');
     if (storedToken) {
       try {
-        const decoded = jwtDecode<UserPayload>(storedToken);
+        const decoded = jwtDecode<UserPayload & { exp?: number }>(storedToken);
+        const currentTime = Date.now() / 1000; // в секундах
+        if (decoded.exp && decoded.exp < currentTime) {
+          console.warn('Токен протермінований');
+          logout(); // Викликаємо твій метод logout
+          return;
+        }
         setToken(storedToken);
         setUser(decoded);
         addAuthTokenToApi(storedToken)
@@ -54,16 +60,17 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     addAuthTokenToApi(token)
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     clearToken();
+    removeAuthTokenFromApi();
     setToken(null);
     setUser(null);
     window.location.href = '/';
-  };
+  }, []);
 
   useEffect(() => {
     setLogout(logout);
-  })
+  }, [logout])
 
   return React.createElement(
     AuthContext.Provider,
