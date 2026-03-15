@@ -4,6 +4,7 @@ import type { AxiosError } from 'axios';
 import api from '../api/api';
 import ColoredDot from '../components/ColoredDot';
 import AddLogEntryModal from '../components/AddLogEntryModal';
+import { PlusCircle } from 'react-bootstrap-icons';
 
 export type ProcedureType = 'period' | 'hours';
 export type ProcedurePeriod = 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'annual';
@@ -144,8 +145,30 @@ function filterFailedEntries(data: LocationGroupProc[]): LocationGroupProc[] {
 }
 
 const DASHBOARD_CSS = `
-.entry-row { display: flex; flex-direction: column; gap: .25rem; }
-.entry-title { overflow-wrap: anywhere; }
+.entry-row { 
+  display: flex; 
+  flex-direction: row;
+  justify-content: space-between; 
+  align-items: center; 
+  gap: 0.5rem; 
+}
+.entry-title { 
+  overflow-wrap: anywhere; 
+  font-size: 0.9rem; 
+}
+.btn-done-minimal {
+  padding: 0px 6px;
+  font-size: 0.7rem;
+  height: 22px;
+  line-height: 1;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.entry-info-block {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
 .btn-done-sm { padding: 2px 8px; font-size: 0.75rem; line-height: 1.2; }
 `;
 
@@ -301,7 +324,7 @@ export default function DashboardPage() {
                                       className="btn-done-sm mt-1"
                                       onClick={() => handleOpenLogModal(e.unit_id, e.procedure_id, e.procedure_name)}
                                     >
-                                      + Лог
+                                      <PlusCircle size={14} />
                                     </Button>
                                   </div>
                                 </ListGroupItem>
