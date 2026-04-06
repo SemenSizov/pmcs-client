@@ -13,7 +13,7 @@ import type { LocationDTO } from '../types/Location';
 import type { Fault } from '../types/Fault';
 
 const FaultsPage = () => {
-    const { user } = useAuth();
+    // const { user } = useAuth();
     const addBtnRef = useRef<HTMLButtonElement>(null);
 
     const [faults, setFaults] = useState<Fault[]>([]);
