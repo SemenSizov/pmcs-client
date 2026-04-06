@@ -171,13 +171,13 @@ const MaintenancePage = () => {
                                 </Form.Select>
                             </Col>
                             <Col md={6}>
-                                <Form.Label>Техніка</Form.Label>
+                                <Form.Label>Обладнання</Form.Label>
                                 <Form.Select
                                     required
                                     disabled={!modalLocation}
                                     onChange={(e) => setSelectedUnitId(Number(e.target.value))}
                                 >
-                                    <option value="">Оберіть пристрій</option>
+                                    <option value="">Оберіть обладнання</option>
                                     {modalLocation?.units.map(u => (
                                         <option key={u.id} value={u.id}>{u.equipmentType.name} (S/N: {u.serial})</option>
                                     ))}
