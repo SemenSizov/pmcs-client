@@ -205,7 +205,7 @@ const FaultsPage = () => {
                                 disabled={!modalLocation}
                                 onChange={(e) => setNewFault({ ...newFault, unitId: Number(e.target.value) })}
                             >
-                                <option value="">Оберіть техніку</option>
+                                <option value="">Оберіть обладнання</option>
                                 {modalLocation?.units.map(u => (
                                     <option key={u.id} value={u.id}>{u.equipmentType.name} (S/N: {u.serial})</option>
                                 ))}
