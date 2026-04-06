@@ -11,6 +11,8 @@ import MetersPage from './pages/MetersPage';
 import { ToastContainer } from 'react-toastify';
 import HomePage from './pages/HomePage'; // додай Home
 import LogEntriesPage from './pages/LogEntriesPage';
+import FaultsPage from './pages/FaultsPage';
+import MaintenancePage from './pages/MaintenancePage';
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -56,6 +58,24 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <LogEntriesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/faults"
+          element={
+            <ProtectedRoute>
+              <FaultsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/maintenance"
+          element={
+            <ProtectedRoute>
+              <MaintenancePage />
             </ProtectedRoute>
           }
         />

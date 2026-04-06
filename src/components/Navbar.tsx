@@ -55,6 +55,12 @@ const NavigationBar = () => {
               <Nav.Link as={NavLink} to="/pmcs" onClick={handleNavItemClick}>
                 Журнал обслуговування
               </Nav.Link>
+              <Nav.Link as={NavLink} to="/faults" onClick={handleNavItemClick}>
+                Несправності
+              </Nav.Link>
+              <Nav.Link as={NavLink} to="/maintenance" onClick={handleNavItemClick}>
+                Проведені роботи
+              </Nav.Link>
               {user?.role === 'admin' && (
                 <Nav.Link as={NavLink} to="/admin" onClick={handleNavItemClick}>
                   Налаштування
