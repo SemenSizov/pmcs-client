@@ -1,5 +1,6 @@
 import { Form, Image, Button } from 'react-bootstrap';
 import { useState } from 'react';
+import { compressImage } from '../utils/imageCompression';
 
 interface Props {
     onImageSelect: (file: File | null) => void;
@@ -9,11 +10,22 @@ interface Props {
 export const ImageUploader = ({ onImageSelect, label }: Props) => {
     const [preview, setPreview] = useState<string | null>(null);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
         if (file) {
-            setPreview(URL.createObjectURL(file));
-            onImageSelect(file);
+            try {
+                // Показуємо оригінал для прев'ю (щоб було миттєво)
+                setPreview(URL.createObjectURL(file));
+
+                // Стискаємо перед тим, як передати у форму
+                const compressed = await compressImage(file, 1200, 0.6);
+                console.log(`Original: ${file.size / 1024}KB, Compressed: ${compressed.size / 1024}KB`);
+
+                onImageSelect(compressed);
+            } catch (err) {
+                console.error("Compression error:", err);
+                onImageSelect(file); // Якщо щось пішло не так — шлемо оригінал
+            }
         } else {
             setPreview(null);
             onImageSelect(null);
@@ -26,7 +38,7 @@ export const ImageUploader = ({ onImageSelect, label }: Props) => {
             <Form.Control
                 type="file"
                 accept="image/*"
-                capture="environment"
+                // capture="environment"
                 onChange={handleChange}
             />
             {preview && (
