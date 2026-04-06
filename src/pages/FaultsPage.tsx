@@ -5,7 +5,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import { getEquipmentUnits } from '../api/equipmentUnits.api';
 import { getLocations } from '../api/locations.api';
 import { addFault, getFaults } from '../api/faults.api'; // Створи ці методи в api
-import { useAuth } from '../auth/AuthProvider';
+// import { useAuth } from '../auth/AuthProvider';
 import { Camera, CheckCircle, ExclamationTriangle } from 'react-bootstrap-icons';
 import { ImageUploader } from '../components/ImageUploader';
 import type { EquipmentUnitDTO } from '../types/EquipmentUnit';
