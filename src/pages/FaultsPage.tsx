@@ -114,12 +114,12 @@ const FaultsPage = () => {
             <Row className="mb-3">
                 <Col md>
                     <Form.Group>
-                        <Form.Label>Локація</Form.Label>
+                        <Form.Label>Техніка</Form.Label>
                         <Form.Select
                             value={filterLocationId ?? ''}
                             onChange={(e) => setFilterLocationId(e.target.value ? Number(e.target.value) : undefined)}
                         >
-                            <option value="">Всі локації</option>
+                            <option value="">Вся техніка</option>
                             {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                         </Form.Select>
                     </Form.Group>
@@ -188,12 +188,12 @@ const FaultsPage = () => {
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group className="mb-2">
-                            <Form.Label>Локація</Form.Label>
+                            <Form.Label>Техніка</Form.Label>
                             <Form.Select
                                 required
                                 onChange={(e) => setModalLocation(locations.find(l => String(l.id) === e.target.value))}
                             >
-                                <option value="">Оберіть локацію</option>
+                                <option value="">Оберіть техніку</option>
                                 {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                             </Form.Select>
                         </Form.Group>

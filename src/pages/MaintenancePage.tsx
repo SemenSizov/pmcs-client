@@ -164,9 +164,9 @@ const MaintenancePage = () => {
                     <Modal.Body>
                         <Row className="mb-3">
                             <Col md={6}>
-                                <Form.Label>Локація</Form.Label>
+                                <Form.Label>Техніка</Form.Label>
                                 <Form.Select required onChange={(e) => setModalLocation(locations.find(l => String(l.id) === e.target.value))}>
-                                    <option value="">Оберіть локацію</option>
+                                    <option value="">Оберіть техніку</option>
                                     {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                                 </Form.Select>
                             </Col>
