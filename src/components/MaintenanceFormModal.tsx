@@ -79,6 +79,7 @@ export const MaintenanceFormModal = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         const formData = new FormData();
         formData.append('unitId', String(selectedUnitId));
         formData.append('date', newLog.date);
@@ -88,25 +89,18 @@ export const MaintenanceFormModal = ({
         if (selectedFile) formData.append('photo', selectedFile);
 
         try {
-            await addMaintenanceLog(formData);
-            toast.success('Ремонт зафіксовано');
-            onSuccess();
-            onHide();
-        } catch (err) {
-            toast.error('Помилка збереження');
-        }
-
-        try {
             if (editData) {
                 await updateMaintenanceLog(editData.id, formData);
                 toast.success('Запис оновлено');
             } else {
                 await addMaintenanceLog(formData);
-                toast.success('Запис додано');
+                toast.success('Запис про ремонт додано');
             }
+
             onSuccess();
             onHide();
         } catch (err) {
+            console.error(err);
             toast.error('Помилка збереження');
         }
     };
