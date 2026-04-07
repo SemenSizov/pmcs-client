@@ -12,6 +12,7 @@ import type { EquipmentUnitDTO } from '../types/EquipmentUnit';
 import type { LocationDTO } from '../types/Location';
 import type { MaintenanceLog } from '../types/Maintenance';
 import type { Fault } from '../types/Fault';
+import ConfirmModal from '../components/ConfirmModal';
 
 const MaintenancePage = () => {
     const [logs, setLogs] = useState<MaintenanceLog[]>([]);
@@ -23,6 +24,8 @@ const MaintenancePage = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [editLog, setEditLog] = useState<any | null>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<number | null>(null);
 
     const fetchData = async () => {
         setLoading(true);
@@ -44,15 +47,23 @@ const MaintenancePage = () => {
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (window.confirm('Ви впевнені, що хочете видалити цей запис?')) {
-            try {
-                await deleteMaintenanceLog(id);
-                toast.success('Запис видалено');
-                fetchData();
-            } catch (err) {
-                toast.error('Не вдалося видалити');
-            }
+
+    const confirmDelete = (id: number) => {
+        setIdToDelete(id);
+        setShowDeleteModal(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!idToDelete) return;
+        try {
+            await deleteMaintenanceLog(idToDelete);
+            toast.success('Запис видалено');
+            fetchData(); // Оновлюємо список
+        } catch (err) {
+            toast.error('Помилка при видаленні');
+        } finally {
+            setShowDeleteModal(false);
+            setIdToDelete(null);
         }
     };
 
@@ -113,7 +124,12 @@ const MaintenancePage = () => {
                                             }}>
                                                 <PencilSquare />
                                             </Button>
-                                            <Button size="sm" variant="outline-danger" onClick={() => handleDelete(log.id)}>
+                                            <Button
+                                                size="sm"
+                                                variant="outline-danger"
+                                                onClick={() => confirmDelete(log.id)}
+                                                className="ms-1"
+                                            >
                                                 <Trash />
                                             </Button>
                                         </div>
@@ -145,6 +161,14 @@ const MaintenancePage = () => {
                     <Button variant="dark" className="m-2" onClick={() => setPreviewImage(null)}>Закрити</Button>
                 </Modal.Body>
             </Modal>
+
+            <ConfirmModal
+                show={showDeleteModal}
+                title="Видалення запису"
+                message="Ви впевнені, що хочете видалити цей звіт про роботу? Цю дію неможливо скасувати."
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setShowDeleteModal(false)}
+            />
         </Container>
     );
 };
