@@ -124,25 +124,31 @@ const FaultsPage = () => {
                 </Button>
             </div>
 
-            <Row className="mb-3">
-                <Col md>
+            <Row className="mb-3 mt-2">
+                <Col md={6}>
                     <Form.Group>
-                        <Form.Label>Техніка</Form.Label>
+                        <Form.Label className="small fw-bold">Фільтр по техніці</Form.Label>
                         <Form.Select
+                            size="sm"
                             value={filterLocationId ?? ''}
-                            onChange={(e) => setFilterLocationId(e.target.value ? Number(e.target.value) : undefined)}
+                            onChange={(e) => {
+                                setFilterLocationId(e.target.value ? Number(e.target.value) : undefined);
+                                setFilterUnitId(undefined); // Скидаємо фільтр обладнання при зміні техніки
+                            }}
                         >
                             <option value="">Вся техніка</option>
                             {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                         </Form.Select>
                     </Form.Group>
                 </Col>
-                <Col md>
+                <Col md={6}>
                     <Form.Group>
-                        <Form.Label>Обладнання</Form.Label>
+                        <Form.Label className="small fw-bold">Фільтр по обладнанню</Form.Label>
                         <Form.Select
+                            size="sm"
                             value={filterUnitId ?? ''}
                             onChange={(e) => setFilterUnitId(e.target.value ? Number(e.target.value) : undefined)}
+                            disabled={!filterLocationId} // Логічно обирати обладнання тільки коли обрана техніка
                         >
                             <option value="">Все обладнання</option>
                             {units
