@@ -136,7 +136,32 @@ export const MaintenanceFormModal = ({
                             ))}
                         </Form.Select>
                     </Form.Group>
-
+                    <Row className="mb-3">
+                        <Col md={6}>
+                            <Form.Group>
+                                <Form.Label fw-bold>Дата виконання робіт</Form.Label>
+                                <Form.Control
+                                    type="date"
+                                    required
+                                    value={newLog.date}
+                                    max={dayjs().format('YYYY-MM-DD')} // Обмежуємо майбутні дати
+                                    onChange={(e) => setNewLog({ ...newLog, date: e.target.value })}
+                                />
+                            </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                            <Form.Group>
+                                <Form.Label fw-bold>Напрацювання (мотогодини)</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    step="0.1"
+                                    placeholder="Напр: 125.5"
+                                    value={newLog.hours}
+                                    onChange={(e) => setNewLog({ ...newLog, hours: e.target.value })}
+                                />
+                            </Form.Group>
+                        </Col>
+                    </Row>
                     <Form.Group className="mb-3">
                         <Form.Label>Опис виконаних робіт</Form.Label>
                         <Form.Control
