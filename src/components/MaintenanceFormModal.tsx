@@ -3,7 +3,7 @@ import { Modal, Form, Row, Col, Button } from 'react-bootstrap';
 import dayjs from 'dayjs';
 import { CalendarCheck } from 'react-bootstrap-icons';
 import { ImageUploader } from './ImageUploader';
-import { addMaintenanceLog } from '../api/maintenance.api';
+import { addMaintenanceLog, updateMaintenanceLog } from '../api/maintenance.api';
 import { toast } from 'react-toastify';
 
 interface MaintenanceFormModalProps {
@@ -12,6 +12,7 @@ interface MaintenanceFormModalProps {
     onSuccess: () => void;
     locations: any[];
     allFaults: any[];
+    editData?: any | null;
     // Оці пропси дозволять нам "прокинути" дані з FaultsPage
     predefinedUnitId?: number;
     predefinedFaultId?: number;
@@ -19,7 +20,7 @@ interface MaintenanceFormModalProps {
 }
 
 export const MaintenanceFormModal = ({
-    show, onHide, onSuccess, locations, allFaults,
+    show, onHide, onSuccess, locations, allFaults, editData,
     predefinedUnitId, predefinedFaultId, predefinedLocationId
 }: MaintenanceFormModalProps) => {
 
@@ -36,7 +37,19 @@ export const MaintenanceFormModal = ({
 
     // Ефект для автозаповнення, якщо дані передані ззовні
     useEffect(() => {
-        if (show) {
+        if (show && editData) {
+            // Знаходимо локацію для об'єкта, що редагується
+            const loc = locations.find(l => l.units.some((u: any) => u.id === editData.unitId));
+            setModalLocation(loc);
+            setSelectedUnitId(editData.unitId);
+            setNewLog({
+                date: dayjs(editData.date).format('YYYY-MM-DD'),
+                hours: editData.hours || '',
+                workDone: editData.workDone,
+                comment: editData.comment || '',
+                faultId: editData.faultId ? String(editData.faultId) : ''
+            });
+        } else if (show) {
             if (predefinedLocationId) {
                 setModalLocation(locations.find(l => l.id === predefinedLocationId));
             }
@@ -58,7 +71,7 @@ export const MaintenanceFormModal = ({
                 faultId: ''
             });
         }
-    }, [show, predefinedLocationId, predefinedUnitId, predefinedFaultId, locations]);
+    }, [show, editData, predefinedLocationId, predefinedUnitId, predefinedFaultId, locations]);
 
     const activeFaultsForUnit = allFaults.filter(f =>
         Number(f.unitId) === Number(selectedUnitId) && !f.isResolved
@@ -82,13 +95,27 @@ export const MaintenanceFormModal = ({
         } catch (err) {
             toast.error('Помилка збереження');
         }
+
+        try {
+            if (editData) {
+                await updateMaintenanceLog(editData.id, formData);
+                toast.success('Запис оновлено');
+            } else {
+                await addMaintenanceLog(formData);
+                toast.success('Запис додано');
+            }
+            onSuccess();
+            onHide();
+        } catch (err) {
+            toast.error('Помилка збереження');
+        }
     };
 
     return (
         <Modal show={show} onHide={onHide} size="lg">
             <Form onSubmit={handleSubmit}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Фіксація проведених робіт</Modal.Title>
+                    <Modal.Title>{editData ? 'Редагування запису' : 'Фіксація проведених робіт'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Row className="mb-3">

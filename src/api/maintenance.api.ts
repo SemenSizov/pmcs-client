@@ -12,3 +12,9 @@ export const getMaintenanceLogs = async () => {
 export const addMaintenanceLog = async (formData: FormData) => {
     return api.post(MAINTENANCE_ENDPOINT, formData);
 };
+
+export const updateMaintenanceLog = (id: number, data: FormData) =>
+    api.put(`${MAINTENANCE_ENDPOINT}/${id}`, data);
+
+export const deleteMaintenanceLog = (id: number) =>
+    api.delete(`${MAINTENANCE_ENDPOINT}/${id}`);

@@ -4,9 +4,9 @@ import dayjs from 'dayjs';
 import { toast, ToastContainer } from 'react-toastify';
 import { getEquipmentUnits } from '../api/equipmentUnits.api';
 import { getLocations } from '../api/locations.api';
-import { getMaintenanceLogs } from '../api/maintenance.api';
+import { deleteMaintenanceLog, getMaintenanceLogs } from '../api/maintenance.api';
 import { getFaults } from '../api/faults.api';
-import { Tools, Camera, Link45deg } from 'react-bootstrap-icons';
+import { Tools, Camera, Link45deg, PencilSquare, Trash } from 'react-bootstrap-icons';
 import { MaintenanceFormModal } from '../components/MaintenanceFormModal'; // Наш новий компонент
 import type { EquipmentUnitDTO } from '../types/EquipmentUnit';
 import type { LocationDTO } from '../types/Location';
@@ -22,6 +22,7 @@ const MaintenancePage = () => {
 
     const [showAddModal, setShowAddModal] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [editLog, setEditLog] = useState<any | null>(null);
 
     const fetchData = async () => {
         setLoading(true);
@@ -40,6 +41,18 @@ const MaintenancePage = () => {
             toast.error('Помилка завантаження даних');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (window.confirm('Ви впевнені, що хочете видалити цей запис?')) {
+            try {
+                await deleteMaintenanceLog(id);
+                toast.success('Запис видалено');
+                fetchData();
+            } catch (err) {
+                toast.error('Не вдалося видалити');
+            }
         }
     };
 
@@ -65,6 +78,7 @@ const MaintenancePage = () => {
                             <th>Мотогодини</th>
                             <th>Пов'язана поломка</th>
                             <th>Фото</th>
+                            <th>Дії</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -91,6 +105,19 @@ const MaintenancePage = () => {
                                             </Button>
                                         )}
                                     </td>
+                                    <td>
+                                        <div className="d-flex gap-2">
+                                            <Button size="sm" variant="outline-primary" onClick={() => {
+                                                setEditLog(log);
+                                                setShowAddModal(true);
+                                            }}>
+                                                <PencilSquare />
+                                            </Button>
+                                            <Button size="sm" variant="outline-danger" onClick={() => handleDelete(log.id)}>
+                                                <Trash />
+                                            </Button>
+                                        </div>
+                                    </td>
                                 </tr>
                             );
                         })}
@@ -101,7 +128,11 @@ const MaintenancePage = () => {
             {/* ОСЬ ВІН — наш уніфікований компонент */}
             <MaintenanceFormModal
                 show={showAddModal}
-                onHide={() => setShowAddModal(false)}
+                onHide={() => {
+                    setShowAddModal(false);
+                    setEditLog(null); // Важливо скидати після закриття
+                }}
+                editData={editLog}
                 onSuccess={fetchData} // Після успішного додавання оновлюємо таблицю
                 locations={locations}
                 allFaults={allFaults}
