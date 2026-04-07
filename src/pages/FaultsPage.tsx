@@ -6,11 +6,12 @@ import { getEquipmentUnits } from '../api/equipmentUnits.api';
 import { getLocations } from '../api/locations.api';
 import { addFault, getFaults } from '../api/faults.api'; // Створи ці методи в api
 // import { useAuth } from '../auth/AuthProvider';
-import { Camera, CheckCircle, ExclamationTriangle } from 'react-bootstrap-icons';
+import { Camera, CheckCircle, ExclamationTriangle, Tools } from 'react-bootstrap-icons';
 import { ImageUploader } from '../components/ImageUploader';
 import type { EquipmentUnitDTO } from '../types/EquipmentUnit';
 import type { LocationDTO } from '../types/Location';
 import type { Fault } from '../types/Fault';
+import { MaintenanceFormModal } from '../components/MaintenanceFormModal';
 
 const FaultsPage = () => {
     // const { user } = useAuth();
@@ -20,6 +21,8 @@ const FaultsPage = () => {
     const [loading, setLoading] = useState(false);
     const [units, setUnits] = useState<EquipmentUnitDTO[]>([]);
     const [locations, setLocations] = useState<LocationDTO[]>([]);
+    const [showRepairModal, setShowRepairModal] = useState(false);
+    const [selectedFaultForRepair, setSelectedFaultForRepair] = useState<any>(null);
 
     // Фільтри
     const [filterLocationId, setFilterLocationId] = useState<number | undefined>(undefined);
@@ -92,6 +95,16 @@ const FaultsPage = () => {
         setModalLocation(undefined);
     };
 
+    const openRepairForm = (fault: Fault) => {
+        const unit = units.find(u => Number(u.id) === Number(fault.unitId));
+        setSelectedFaultForRepair({
+            faultId: fault.id,
+            unitId: fault.unitId,
+            locationId: unit?.location.id
+        });
+        setShowRepairModal(true);
+    };
+
     // Фільтрація на фронті (для простоти, як у твоїх LogEntries)
     const filteredFaults = faults.filter(f => {
         const unit = units.find(u => Number(u.id) === Number(f.unitId));
@@ -150,6 +163,7 @@ const FaultsPage = () => {
                             <th>Опис проблеми</th>
                             <th>Статус</th>
                             <th>Фото</th>
+                            <th>Закрити</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -172,6 +186,9 @@ const FaultsPage = () => {
                                                 <Camera />
                                             </Button>
                                         )}
+                                    </td>
+                                    <td>
+                                        <Button variant="success" size="sm" onClick={() => openRepairForm(fault)}><Tools /></Button>
                                     </td>
                                 </tr>
                             );
@@ -248,6 +265,17 @@ const FaultsPage = () => {
                     <Image src={`data:image/jpeg;base64,${previewImage}`} fluid rounded />
                 </Modal.Body>
             </Modal>
+
+            <MaintenanceFormModal
+                show={showRepairModal}
+                onHide={() => setShowRepairModal(false)}
+                onSuccess={fetchData} // Щоб оновити список несправностей після ремонту
+                locations={locations}
+                allFaults={faults}
+                predefinedFaultId={selectedFaultForRepair?.faultId}
+                predefinedUnitId={selectedFaultForRepair?.unitId}
+                predefinedLocationId={selectedFaultForRepair?.locationId}
+            />
         </Container>
     );
 };
