@@ -133,7 +133,7 @@ const FaultsPage = () => {
                             value={filterLocationId ?? ''}
                             onChange={(e) => {
                                 setFilterLocationId(e.target.value ? Number(e.target.value) : undefined);
-                                setModalLocation(locations.find(l => l.id === (e.target.value ? Number(e.target.value) : undefined)))
+                                setModalLocation(locations.find(l => l.id === filterLocationId))
                                 setFilterUnitId(undefined); // Скидаємо фільтр обладнання при зміні техніки
                             }}
                         >
