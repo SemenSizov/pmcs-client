@@ -212,6 +212,8 @@ const MaintenancePage = () => {
                 onSuccess={fetchData} // Після успішного додавання оновлюємо таблицю
                 locations={locations}
                 allFaults={allFaults}
+                predefinedLocationId={filterLocationId}
+                predefinedUnitId={filterUnitId}
             />
 
             {/* Модалка перегляду фото залишається тут, бо вона специфічна для таблиці */}

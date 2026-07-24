@@ -133,6 +133,7 @@ const FaultsPage = () => {
                             value={filterLocationId ?? ''}
                             onChange={(e) => {
                                 setFilterLocationId(e.target.value ? Number(e.target.value) : undefined);
+                                setModalLocation(locations.find(l => l.id === (e.target.value ? Number(e.target.value) : undefined)))
                                 setFilterUnitId(undefined); // Скидаємо фільтр обладнання при зміні техніки
                             }}
                         >
@@ -147,7 +148,10 @@ const FaultsPage = () => {
                         <Form.Select
                             size="sm"
                             value={filterUnitId ?? ''}
-                            onChange={(e) => setFilterUnitId(e.target.value ? Number(e.target.value) : undefined)}
+                            onChange={(e) => {
+                                setFilterUnitId(e.target.value ? Number(e.target.value) : undefined)
+                            }
+                            }
                             disabled={!filterLocationId} // Логічно обирати обладнання тільки коли обрана техніка
                         >
                             <option value="">Все обладнання</option>
@@ -228,6 +232,7 @@ const FaultsPage = () => {
                             <Form.Select
                                 required
                                 disabled={!modalLocation}
+
                                 onChange={(e) => setNewFault({ ...newFault, unitId: Number(e.target.value) })}
                             >
                                 <option value="">Оберіть обладнання</option>
