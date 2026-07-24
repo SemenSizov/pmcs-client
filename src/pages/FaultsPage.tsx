@@ -165,6 +165,7 @@ const FaultsPage = () => {
                     <thead>
                         <tr>
                             <th>Дата</th>
+                            <th>Техніка</th>
                             <th>Обладнання</th>
                             <th>Опис проблеми</th>
                             <th>Статус</th>
@@ -178,6 +179,7 @@ const FaultsPage = () => {
                             return (
                                 <tr key={fault.id}>
                                     <td>{dayjs(fault.reportDate).format('YYYY-MM-DD')}</td>
+                                    <td>{unit?.location.name}</td>
                                     <td>{unit ? `${unit.equipmentType.name} (S/N: ${unit.serial})` : `ID: ${fault.unitId}`}</td>
                                     <td>{fault.description}</td>
                                     <td>

@@ -135,6 +135,7 @@ const MaintenancePage = () => {
                     <thead>
                         <tr>
                             <th>Дата</th>
+                            <th>Техніка</th>
                             <th>Обладнання</th>
                             <th>Виконана робота</th>
                             <th>Мотогодини</th>
@@ -151,6 +152,7 @@ const MaintenancePage = () => {
                                 return (
                                     <tr key={log.id}>
                                         <td>{dayjs(log.date).format('YYYY-MM-DD')}</td>
+                                        <td>{unit?.location.name}                                        </td>
                                         <td>{unit ? `${unit.equipmentType.name} (S/N: ${unit.serial})` : `Unit ID: ${log.unitId}`}</td>
                                         <td>{log.workDone}</td>
                                         <td>{log.hours ?? '—'}</td>
