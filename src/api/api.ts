@@ -19,11 +19,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 500) {
-      const errorMessage = 'Сталася помилка на сервері. Спробуйте пізніше.';
+      let errorMessage = 'Сталася помилка на сервері. Спробуйте пізніше.';
       if (error.message) {
-        errorMessage.concat(`Деталі: ${error.message}`);
-        toast.error(errorMessage);
+        errorMessage += ` Деталі: ${error.message}`;
       }
+      toast.error(errorMessage);
       return Promise.reject(error);
     }
     if (error.response?.status === 401) {

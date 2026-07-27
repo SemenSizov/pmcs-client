@@ -13,6 +13,11 @@ export const addFault = async (formData: FormData) => {
     return api.post(FAULTS_ENDPOINT, formData);
 };
 
+// Оновлення несправності
+export const updateFault = async (id: number, formData: FormData) => {
+    return api.put(`${FAULTS_ENDPOINT}/${id}`, formData);
+};
+
 // Усунення несправності (якщо буде окремий ендпоінт)
 export const resolveFaultApi = async (formData: FormData) => {
     return api.post(`${FAULTS_ENDPOINT}/resolve`, formData);
