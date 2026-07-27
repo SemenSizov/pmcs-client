@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Table, Spinner, Row, Col, Form, Button, Modal, Container, Badge, Image } from 'react-bootstrap';
 import dayjs from 'dayjs';
 import { toast, ToastContainer } from 'react-toastify';
 import { getEquipmentUnits } from '../api/equipmentUnits.api';
 import { getLocations } from '../api/locations.api';
-import { addFault, getFaults } from '../api/faults.api'; // Створи ці методи в api
-// import { useAuth } from '../auth/AuthProvider';
+import { addFault, getFaults } from '../api/faults.api';
 import { Camera, CheckCircle, ExclamationTriangle, Tools } from 'react-bootstrap-icons';
 import { ImageUploader } from '../components/ImageUploader';
 import type { EquipmentUnitDTO } from '../types/EquipmentUnit';
@@ -13,8 +12,13 @@ import type { LocationDTO } from '../types/Location';
 import type { Fault } from '../types/Fault';
 import { MaintenanceFormModal } from '../components/MaintenanceFormModal';
 
+interface SelectedRepairData {
+    faultId: number;
+    unitId: number;
+    locationId?: number;
+}
+
 const FaultsPage = () => {
-    // const { user } = useAuth();
     const addBtnRef = useRef<HTMLButtonElement>(null);
 
     const [faults, setFaults] = useState<Fault[]>([]);
@@ -22,7 +26,7 @@ const FaultsPage = () => {
     const [units, setUnits] = useState<EquipmentUnitDTO[]>([]);
     const [locations, setLocations] = useState<LocationDTO[]>([]);
     const [showRepairModal, setShowRepairModal] = useState(false);
-    const [selectedFaultForRepair, setSelectedFaultForRepair] = useState<any>(null);
+    const [selectedFaultForRepair, setSelectedFaultForRepair] = useState<SelectedRepairData | null>(null);
 
     // Фільтри
     const [filterLocationId, setFilterLocationId] = useState<number | undefined>(undefined);
@@ -41,13 +45,27 @@ const FaultsPage = () => {
     // Стейт для перегляду фото
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
+    // Fast O(1) lookup map для обладнання
+    const unitsMap = useMemo(() => {
+        const map = new Map<number, EquipmentUnitDTO>();
+        units.forEach(u => map.set(Number(u.id), u));
+        return map;
+    }, [units]);
+
     const fetchData = async () => {
         setLoading(true);
         try {
-            const { data } = await getFaults(); // Можна додати фільтрацію на бекенд пізніше
-            setFaults(data);
+            const [faultsRes, unitsRes, locationsRes] = await Promise.all([
+                getFaults(),
+                getEquipmentUnits(),
+                getLocations()
+            ]);
+
+            setFaults(faultsRes.data);
+            setUnits(unitsRes.data);
+            setLocations(locationsRes.data.sort((a: LocationDTO, b: LocationDTO) => a.name.localeCompare(b.name)));
         } catch (err) {
-            toast.error('Помилка завантаження списку несправностей');
+            toast.error('Помилка завантаження даних');
         } finally {
             setLoading(false);
         }
@@ -55,14 +73,31 @@ const FaultsPage = () => {
 
     useEffect(() => {
         fetchData();
-        getEquipmentUnits().then((res) => setUnits(res.data));
-        getLocations().then((res) => setLocations(res.data.sort((a: any, b: any) => a.name.localeCompare(b.name))));
     }, []);
+
+    // При відкритті модалки додавання підтягуємо локацію з фільтру, якщо вона обрана
+    const handleOpenAddModal = () => {
+        if (filterUnitId) {
+            const selectedUnit = unitsMap.get(filterUnitId);
+            if (selectedUnit) {
+                const parentLoc = locations.find(l => l.id === selectedUnit.location?.id);
+                setModalLocation(parentLoc);
+                setNewFault(prev => ({
+                    ...prev,
+                    unitId: filterUnitId
+                }));
+            }
+        } else if (filterLocationId) {
+            const currentLoc = locations.find(l => l.id === filterLocationId);
+            setModalLocation(currentLoc);
+        }
+        setShowAddModal(true);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newFault.unitId || !newFault.description) {
-            toast.warn('Заповніть основні поля');
+        if (!newFault.unitId || !newFault.description.trim()) {
+            toast.warn('Заповніть всі обов\'язкові поля');
             return;
         }
 
@@ -81,7 +116,7 @@ const FaultsPage = () => {
             resetModal();
             fetchData();
         } catch (err) {
-            toast.error('Помилка при збереженні');
+            toast.error('Помилка при збереженні несправності');
         }
     };
 
@@ -96,35 +131,46 @@ const FaultsPage = () => {
     };
 
     const openRepairForm = (fault: Fault) => {
-        const unit = units.find(u => Number(u.id) === Number(fault.unitId));
+        const unit = unitsMap.get(Number(fault.unitId));
         setSelectedFaultForRepair({
             faultId: fault.id,
             unitId: fault.unitId,
-            locationId: unit?.location.id
+            locationId: unit?.location?.id
         });
         setShowRepairModal(true);
     };
 
-    // Фільтрація на фронті (для простоти, як у твоїх LogEntries)
-    const filteredFaults = faults.filter(f => {
-        const unit = units.find(u => Number(u.id) === Number(f.unitId));
-        if (filterLocationId && unit?.location.id !== filterLocationId) return false;
-        if (filterUnitId && f.unitId !== filterUnitId) return false;
-        return true;
-    });
+    const filteredFaults = useMemo(() => {
+        return faults.filter(f => {
+            const unit = unitsMap.get(Number(f.unitId));
+            if (filterLocationId && unit?.location?.id !== filterLocationId) return false;
+            if (filterUnitId && f.unitId !== filterUnitId) return false;
+            return true;
+        });
+    }, [faults, unitsMap, filterLocationId, filterUnitId]);
+
+    // Допоміжна функція для форматування src картинки
+    const formatImageSrc = (photoStr: string) => {
+        if (photoStr.startsWith('http') || photoStr.startsWith('data:')) {
+            return photoStr;
+        }
+        return `data:image/jpeg;base64,${photoStr}`;
+    };
 
     return (
-        <Container>
-            <ToastContainer />
+        <Container fluid="lg" className="py-3">
+            <ToastContainer autoClose={3000} />
+
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h4>Журнал несправностей (Дефектовка)</h4>
-                <Button ref={addBtnRef} onClick={() => setShowAddModal(true)} variant="danger">
+                <h4 className="mb-0">Журнал несправностей (Дефектовка)</h4>
+                <Button ref={addBtnRef} onClick={handleOpenAddModal} variant="danger">
                     <ExclamationTriangle className="me-2" />
                     Зафіксувати поломку
                 </Button>
             </div>
 
-            <Row className="mb-3 mt-2">
+            {/* Фільтри */}
+            <Row className="g-2 mb-3">
                 <Col md={6}>
                     <Form.Group>
                         <Form.Label className="small fw-bold">Фільтр по техніці</Form.Label>
@@ -132,9 +178,9 @@ const FaultsPage = () => {
                             size="sm"
                             value={filterLocationId ?? ''}
                             onChange={(e) => {
-                                setFilterLocationId(e.target.value ? Number(e.target.value) : undefined);
-                                setModalLocation(locations.find(l => l.id === filterLocationId))
-                                setFilterUnitId(undefined); // Скидаємо фільтр обладнання при зміні техніки
+                                const val = e.target.value ? Number(e.target.value) : undefined;
+                                setFilterLocationId(val);
+                                setFilterUnitId(undefined); // Скидаємо обладнання при зміні техніки
                             }}
                         >
                             <option value="">Вся техніка</option>
@@ -148,101 +194,133 @@ const FaultsPage = () => {
                         <Form.Select
                             size="sm"
                             value={filterUnitId ?? ''}
-                            onChange={(e) => {
-                                setFilterUnitId(e.target.value ? Number(e.target.value) : undefined)
-                            }
-                            }
-                            disabled={!filterLocationId} // Логічно обирати обладнання тільки коли обрана техніка
+                            onChange={(e) => setFilterUnitId(e.target.value ? Number(e.target.value) : undefined)}
+                            disabled={!filterLocationId}
                         >
                             <option value="">Все обладнання</option>
                             {units
-                                .filter(u => !filterLocationId || u.location.id === filterLocationId)
-                                .map(u => <option key={u.id} value={u.id}>{u.equipmentType.name} (S/N: {u.serial})</option>)
+                                .filter(u => u.location?.id === filterLocationId)
+                                .map(u => (
+                                    <option key={u.id} value={u.id}>
+                                        {u.equipmentType.name} (S/N: {u.serial})
+                                    </option>
+                                ))
                             }
                         </Form.Select>
                     </Form.Group>
                 </Col>
             </Row>
 
-            {loading ? <Spinner animation="border" /> : (
-                <Table bordered hover responsive className="table-sm">
-                    <thead>
+            {/* Таблиця */}
+            {loading ? (
+                <div className="text-center my-5">
+                    <Spinner animation="border" variant="primary" />
+                </div>
+            ) : (
+                <Table bordered hover responsive className="table-sm align-middle">
+                    <thead className="table-light">
                         <tr>
                             <th>Дата</th>
                             <th>Техніка</th>
                             <th>Обладнання</th>
                             <th>Опис проблеми</th>
                             <th>Статус</th>
-                            <th>Фото</th>
-                            <th>Закрити</th>
+                            <th className="text-center">Фото</th>
+                            <th className="text-center">Дія</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredFaults.map((fault) => {
-                            const unit = units.find(u => Number(u.id) === Number(fault.unitId));
-                            return (
-                                <tr key={fault.id}>
-                                    <td>{dayjs(fault.reportDate).format('YYYY-MM-DD')}</td>
-                                    <td>{unit?.location.name}</td>
-                                    <td>{unit ? `${unit.equipmentType.name} (S/N: ${unit.serial})` : `ID: ${fault.unitId}`}</td>
-                                    <td>{fault.description}</td>
-                                    <td>
-                                        {fault.isResolved ?
-                                            <Badge bg="success"><CheckCircle className="me-1" /> Виправлено</Badge> :
-                                            <Badge bg="danger">Активна</Badge>
-                                        }
-                                    </td>
-                                    <td>
-                                        {fault.reportPhoto && (
-                                            <Button size="sm" variant="outline-primary" onClick={() => setPreviewImage(fault.reportPhoto as string)}>
-                                                <Camera />
+                        {filteredFaults.length === 0 ? (
+                            <tr>
+                                <td colSpan={7} className="text-center text-muted py-3">
+                                    Несправностей не знайдено
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredFaults.map((fault) => {
+                                const unit = unitsMap.get(Number(fault.unitId));
+                                return (
+                                    <tr key={fault.id}>
+                                        <td className="text-nowrap">{dayjs(fault.reportDate).format('YYYY-MM-DD')}</td>
+                                        <td>{unit?.location?.name || '-'}</td>
+                                        <td>{unit ? `${unit.equipmentType.name} (S/N: ${unit.serial})` : `ID: ${fault.unitId}`}</td>
+                                        <td>{fault.description}</td>
+                                        <td>
+                                            {fault.isResolved ? (
+                                                <Badge bg="success"><CheckCircle className="me-1" /> Виправлено</Badge>
+                                            ) : (
+                                                <Badge bg="danger">Активна</Badge>
+                                            )}
+                                        </td>
+                                        <td className="text-center">
+                                            {fault.reportPhoto && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline-primary"
+                                                    onClick={() => setPreviewImage(fault.reportPhoto as string)}
+                                                >
+                                                    <Camera />
+                                                </Button>
+                                            )}
+                                        </td>
+                                        <td className="text-center">
+                                            <Button
+                                                variant="success"
+                                                size="sm"
+                                                title="Усунути несправність"
+                                                onClick={() => openRepairForm(fault)}
+                                                disabled={fault.isResolved}
+                                            >
+                                                <Tools />
                                             </Button>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <Button variant="success" size="sm" onClick={() => openRepairForm(fault)}><Tools /></Button>
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
                     </tbody>
                 </Table>
             )}
 
             {/* Модалка додавання */}
-            <Modal show={showAddModal} onHide={() => { setShowAddModal(false); resetModal(); }}>
+            <Modal show={showAddModal} onHide={() => { setShowAddModal(false); resetModal(); }} backdrop="static">
                 <Form onSubmit={handleSubmit}>
                     <Modal.Header closeButton>
                         <Modal.Title>Нова несправність</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <Form.Group className="mb-2">
-                            <Form.Label>Техніка</Form.Label>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Техніка <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 required
-                                onChange={(e) => setModalLocation(locations.find(l => String(l.id) === e.target.value))}
+                                value={modalLocation?.id || ''}
+                                onChange={(e) => {
+                                    const selectedLoc = locations.find(l => String(l.id) === e.target.value);
+                                    setModalLocation(selectedLoc);
+                                    setNewFault(prev => ({ ...prev, unitId: 0 })); // Скидаємо обладнання при зміні техніки
+                                }}
                             >
                                 <option value="">Оберіть техніку</option>
                                 {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                             </Form.Select>
                         </Form.Group>
 
-                        <Form.Group className="mb-2">
-                            <Form.Label>Обладнання</Form.Label>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Обладнання <span className="text-danger">*</span></Form.Label>
                             <Form.Select
                                 required
                                 disabled={!modalLocation}
-
+                                value={newFault.unitId || ''}
                                 onChange={(e) => setNewFault({ ...newFault, unitId: Number(e.target.value) })}
                             >
                                 <option value="">Оберіть обладнання</option>
-                                {modalLocation?.units.map(u => (
+                                {modalLocation?.units?.map(u => (
                                     <option key={u.id} value={u.id}>{u.equipmentType.name} (S/N: {u.serial})</option>
                                 ))}
                             </Form.Select>
                         </Form.Group>
 
-                        <Form.Group className="mb-2">
+                        <Form.Group className="mb-3">
                             <Form.Label>Дата виявлення</Form.Label>
                             <Form.Control
                                 type="date"
@@ -251,8 +329,8 @@ const FaultsPage = () => {
                             />
                         </Form.Group>
 
-                        <Form.Group className="mb-2">
-                            <Form.Label>Опис поломки</Form.Label>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Опис поломки <span className="text-danger">*</span></Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -265,7 +343,7 @@ const FaultsPage = () => {
                         <ImageUploader label="Додати фото" onImageSelect={setSelectedFile} />
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={() => setShowAddModal(false)}>Скасувати</Button>
+                        <Button variant="secondary" onClick={() => { setShowAddModal(false); resetModal(); }}>Скасувати</Button>
                         <Button variant="danger" type="submit">Зафіксувати</Button>
                     </Modal.Footer>
                 </Form>
@@ -275,14 +353,15 @@ const FaultsPage = () => {
             <Modal show={!!previewImage} onHide={() => setPreviewImage(null)} centered size="lg">
                 <Modal.Header closeButton><Modal.Title>Фото несправності</Modal.Title></Modal.Header>
                 <Modal.Body className="text-center">
-                    <Image src={`data:image/jpeg;base64,${previewImage}`} fluid rounded />
+                    {previewImage && <Image src={formatImageSrc(previewImage)} fluid rounded />}
                 </Modal.Body>
             </Modal>
 
+            {/* Модалка ремонту */}
             <MaintenanceFormModal
                 show={showRepairModal}
                 onHide={() => setShowRepairModal(false)}
-                onSuccess={fetchData} // Щоб оновити список несправностей після ремонту
+                onSuccess={fetchData}
                 locations={locations}
                 allFaults={faults}
                 predefinedFaultId={selectedFaultForRepair?.faultId}
