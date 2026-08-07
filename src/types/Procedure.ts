@@ -1,7 +1,7 @@
 export interface Procedure {
   id: number;
   name: string;
-  type: 'hours' | 'period';
+  type: 'hours' | 'period' | 'hybrid';
   hours?: number;
   period?: string;
   equipment_type_id: number;

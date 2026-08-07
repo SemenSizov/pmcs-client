@@ -24,7 +24,7 @@ export default function AdminProceduresPage() {
   const [editingProcedure, setEditingProcedure] = useState<ProcedureDTO | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [procedureToDelete, setProcedureToDelete] = useState<ProcedureDTO | null>(null);
-  const [periodicityType, setPeriodicityType] = useState<'period' | 'hours'>('period');
+  const [periodicityType, setPeriodicityType] = useState<'period' | 'hours' | 'hybrid'>('period');
   const [periodValue, setPeriodValue] = useState('');
   const [engineHours, setEngineHours] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -198,6 +198,7 @@ export default function AdminProceduresPage() {
               <Form.Select value={periodicityType} onChange={handleTypeChange}>
                 <option value="period">Період</option>
                 <option value="hours">Мотогодини</option>
+                <option value="hybrid">Період та Мотогодини</option>
               </Form.Select>
             </Form.Group>
 
@@ -206,7 +207,7 @@ export default function AdminProceduresPage() {
               <Form.Control name="name" defaultValue={editingProcedure?.name || ''} required autoFocus />
             </Form.Group>
 
-            {periodicityType === 'period' && (
+            {(periodicityType === 'period' || periodicityType === 'hybrid') && (
               <Form.Group className="mb-3">
                 <Form.Label>Період</Form.Label>
                 <Form.Select value={periodValue} onChange={(e) => setPeriodValue(e.target.value)} required>
@@ -220,7 +221,7 @@ export default function AdminProceduresPage() {
               </Form.Group>
             )}
 
-            {periodicityType === 'hours' && (
+            {(periodicityType === 'hours' || periodicityType === 'hybrid') && (
               <Form.Group className="mb-3">
                 <Form.Label>Кількість мотогодин</Form.Label>
                 <Form.Control
