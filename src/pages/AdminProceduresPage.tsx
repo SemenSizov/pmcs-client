@@ -153,8 +153,8 @@ export default function AdminProceduresPage() {
                 <td>{idx + 1}</td>
                 <td>{p.equipmentType.name}</td>
                 <td>{p.name}</td>
-                <td>{p.type === 'period' ? 'Період' : 'Мотогодини'}</td>
-                <td>{p.type === 'period' ? periodMapping[p.period!] : p.hours}</td>
+                <td>{p.type === 'period' ? 'Період' : p.type === 'hours' ? 'Мотогодини' : 'Період та Мотогодини'}</td>
+                <td>{p.type === 'period' ? periodMapping[p.period!] : p.type === 'hours' ? p.hours : `Період: ${periodMapping[p.period!]}, Мотогодини: ${p.hours}`}</td>
                 <td>
                   <div className="d-flex gap-2">
                     <Button size="sm" variant="secondary" onClick={() => handleEdit(p)}>

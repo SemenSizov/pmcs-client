@@ -10,7 +10,7 @@ export interface Procedure {
 export interface ProcedureDTO {
   id: number;
   name: string;
-  type: 'hours' | 'period';
+  type: 'hours' | 'period' | 'hybrid';
   hours?: number;
   period?: 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'annual';
   equipmentType: {
