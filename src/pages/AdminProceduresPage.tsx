@@ -106,8 +106,8 @@ export default function AdminProceduresPage() {
       id: editingProcedure ? editingProcedure.id : Date.now(),
       name: formData.get('name') as string,
       type: periodicityType,
-      hours: periodicityType === 'hours' ? +engineHours : 0,
-      period: periodicityType === 'period' ? periodValue : '',
+      hours: periodicityType !== 'period' ? +engineHours : 0,
+      period: periodicityType !== 'hours' ? periodValue : '',
       equipment_type_id: +formData.get('equipmentTypeId')!,
     };
 
