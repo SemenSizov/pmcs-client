@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Modal, Form, Row, Col, Button } from 'react-bootstrap';
 import dayjs from 'dayjs';
-import { CalendarCheck, Tools, CheckCircleFill } from 'react-bootstrap-icons';
+import { Tools, CheckCircleFill } from 'react-bootstrap-icons';
 import { ImageUploader } from './ImageUploader';
 import { addMaintenanceLog, updateMaintenanceLog } from '../api/maintenance.api';
 import { toast } from 'react-toastify';
