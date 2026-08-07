@@ -6,7 +6,7 @@ import ColoredDot from '../components/ColoredDot';
 import AddLogEntryModal from '../components/AddLogEntryModal';
 import { PlusCircle } from 'react-bootstrap-icons';
 
-export type ProcedureType = 'period' | 'hours';
+export type ProcedureType = 'period' | 'hours' | 'hybrid';
 export type ProcedurePeriod = 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'annual';
 type status = 'ok' | 'warning' | 'error'
 
@@ -94,14 +94,13 @@ function diffDaysFromToday(ymd: string, procPeriod: ProcedurePeriod) {
 }
 
 function getEntryProc(de: DashboardEntry): DashboardEntryProc {
-  const interval = de.procedure_type === 'hours'
-    ? (de.last_log_hours || 0) + de.procedure_hours - (de.last_meter_hours || 0)
-    : diffDaysFromToday(fmtDate(de.last_log_date), de.procedure_period);
-
+  const hoursInterval = (de.last_log_hours || 0) + de.procedure_hours - (de.last_meter_hours || 0);
+  const daysInterval = diffDaysFromToday(fmtDate(de.last_log_date), de.procedure_period);
+  const interval = de.procedure_type === 'hours' ? hoursInterval : daysInterval;
   return {
     ...de,
     intervalToNext: interval,
-    intervalToNextStr: de.procedure_type === 'hours' ? `${interval} год.` : `${interval} дн.`
+    intervalToNextStr: de.procedure_type === 'hours' ? `${interval} год.` : de.procedure_type === 'period' ? `${interval} дн.` : `${daysInterval} дн. або ${hoursInterval} мотогод.`
   };
 }
 
